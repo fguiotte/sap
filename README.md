@@ -1,5 +1,10 @@
 # Simple Attribute Profiles (SAP)
 
+
+[![pipeline status](https://gitlab.inria.fr/fguiotte/sap/badges/master/pipeline.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/master)
+[![coverage report](https://gitlab.inria.fr/fguiotte/sap/badges/master/coverage.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/master)
+
+
 SAP is a Python package to easily compute morphological attribute
 profiles (AP) of images.
 

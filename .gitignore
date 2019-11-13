@@ -2,4 +2,5 @@ build/
 dist/
 *.egg*/
 __pycache__/
-
+_build/
+doc/source

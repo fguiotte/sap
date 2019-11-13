@@ -3,14 +3,20 @@
 # author Florent Guiotte <florent.guiotte@irisa.fr>
 # version 0.0
 # date 13 nov. 2019
-"""Tree
+"""
+Trees
+=====
 
-Base class for component Trees.
+Component trees classes.
 """
 
 import higra as hg
 
 class Tree:
+    """Tree
+
+    Abstract base class for trees representations of images.
+    """
     def __init__(self, image, adjacency=4):
         if self.__class__ == Tree:
             raise TypeError('Do not instanciate directly abstract class Tree.')

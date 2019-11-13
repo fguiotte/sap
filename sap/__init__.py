@@ -10,3 +10,4 @@ morphological attribute profiles (AP) of images.
 
 """
 
+from .trees import *

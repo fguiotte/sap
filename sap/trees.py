@@ -34,6 +34,22 @@ class Tree:
                     'implemented.'.format(self._adjacency))
     
     def get_attribute(self, attribute):
+        """Get the nodes attribute
+
+        Details of the function.
+
+        Parameters
+        ------
+        attribute: str
+            Name of the attribute. Can be 'area' or 'comptactness' for
+            exemple.
+
+        Returns
+        -------
+        attribute: ndarray
+            The values of attribute for each nodes.
+
+        """
         compute = getattr(hg, 'attribute_' + attribute)
         args = {}
         if 'altitudes' in inspect.signature(compute).parameters:

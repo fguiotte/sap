@@ -17,7 +17,7 @@ pip install sap
 
 ## Documentation
 
-Documentation is available at <https://python-sap.readthedocs.org/>.
+Documentation is available on <https://python-sap.rtfd.io>.
 
 ### Notebooks
 
@@ -39,5 +39,4 @@ filtered_image = t.reconstruct(area < 100)
 plt.imshow(filtered_image)
 plt.show()
 ```
-
 

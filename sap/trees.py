@@ -7,7 +7,18 @@
 Trees
 =====
 
-Component trees classes.
+This submodule contain the component tree helper.
+
+Example
+-------
+
+Basic creation of a tree and area filtering of an image with the
+MaxTree:
+
+>>>  t = sap.MaxTree(image)
+>>>  area = t.get_attribute('area')
+>>>  filtered_image = t.reconstruct(area < 100)
+
 """
 
 import higra as hg
@@ -15,21 +26,23 @@ import higra as hg
 class Tree:
     """Tree
 
-    Abstract base class for trees representations of images.
+    Abstract class for trees representations of images. You should not
+    instantiate directly Tree, use MaxTree or MinTree instead.
 
     Parameters
     ----------
     image: ndarray
-        The image to be represented with the tree structure
-
-    Attributes
-    ----------
-    _adjacency: int
-        Pixel connectivity used during the tree creation.
+        The image to be represented with the tree structure.
+    adjacency: int
+        The pixel connectivity to use during the tree creation.
+        Determines the number of pixels to be taken into account in the
+        neighborhood of each pixel. The allowed adjacency are 4 or 8.
+        Default is 4.
+        
     """
     def __init__(self, image, adjacency=4):
         if self.__class__ == Tree:
-            raise TypeError('Do not instanciate directly abstract class Tree.')
+            raise TypeError('Do not instantiate directly abstract class Tree.')
 
         self._adjacency = adjacency
         self._image = image
@@ -44,7 +57,7 @@ class Tree:
                     'implemented.'.format(self._adjacency))
     
     def get_attribute(self, attribute):
-        """Get the nodes attribute
+        """Get attribute values of the tree nodes 
 
         Details of the function.
 

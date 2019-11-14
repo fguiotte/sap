@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Simple Attribute Profiles's documentation!
-=====================================================
+Simple Attribute Profiles's documentation
+=========================================
 
 .. toctree::
     :maxdepth: 2
@@ -18,6 +18,12 @@ Welcome to Simple Attribute Profiles's documentation!
 
     sap <source/sap>
     sap.trees <source/sap.trees>
+
+.. toctree::
+    :caption: Links
+
+    Source code <https://gitlab.inria.fr/fguiotte/sap>
+    Pypi package <https://pypi.org/project/sap/>
 
 
 Indices and tables

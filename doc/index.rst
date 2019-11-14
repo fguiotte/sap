@@ -20,8 +20,6 @@ The API
 .. toctree::
    :maxdepth: 3
 
-   API <source/sap>
-
 
 Indices and tables
 ==================

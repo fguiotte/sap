@@ -2,9 +2,8 @@ version: 2
 
 python:
   version: 3.7
-    install:
-      - requirements: doc/requirements.txt
-        python:
+  install:
+    - requirements: doc/requirements.txt
 
 sphinx:
   builder: html

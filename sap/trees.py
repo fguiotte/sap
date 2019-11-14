@@ -16,6 +16,16 @@ class Tree:
     """Tree
 
     Abstract base class for trees representations of images.
+
+    Parameters
+    ----------
+    image: ndarray
+        The image to be represented with the tree structure
+
+    Attributes
+    ----------
+    _adjacency: int
+        Pixel connectivity used during the tree creation.
     """
     def __init__(self, image, adjacency=4):
         if self.__class__ == Tree:

@@ -7,7 +7,7 @@
 Trees
 =====
 
-This submodule contain the component tree helper.
+This submodule contain the component tree helpers.
 
 Example
 -------

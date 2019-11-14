@@ -6,21 +6,18 @@
 Welcome to Simple Attribute Profiles's documentation!
 =====================================================
 
-The basics
-----------
+.. toctree::
+    :maxdepth: 2
+    :caption: Informations
+
+    info/start
 
 .. toctree::
-   :maxdepth: 2
-
-   test/test
-
-The API
--------
-
-.. toctree::
-   :maxdepth: 3
+    :maxdepth: 1
+    :caption: API
 
     sap <source/sap>
+    sap.trees <source/sap.trees>
 
 
 Indices and tables

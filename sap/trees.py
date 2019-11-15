@@ -38,7 +38,7 @@ class Tree:
         Determines the number of pixels to be taken into account in the
         neighborhood of each pixel. The allowed adjacency are 4 or 8.
         Default is 4.
-        
+
     """
     def __init__(self, image, adjacency=4):
         if self.__class__ == Tree:
@@ -46,7 +46,7 @@ class Tree:
 
         self._adjacency = adjacency
         self._image = image
-        
+
     def _get_adjacency_graph(self):
         if self._adjacency == 4:
             return hg.get_4_adjacency_graph(self._image.shape)
@@ -55,9 +55,9 @@ class Tree:
         else:
             raise NotImplementedError('adjacency of {} is not '
                     'implemented.'.format(self._adjacency))
-    
+
     def get_attribute(self, attribute):
-        """Get attribute values of the tree nodes 
+        """Get attribute values of the tree nodes
 
         Details of the function.
 
@@ -78,7 +78,7 @@ class Tree:
         if 'altitudes' in inspect.signature(compute).parameters:
             args['altitudes'] = self._alt
         return compute(self._tree, **args)
-    
+
     def reconstruct(self, deleted_nodes=None):
         return hg.reconstruct_leaf_data(self._tree, self._alt, deleted_nodes)
 
@@ -95,5 +95,3 @@ class MinTree(Tree):
         super().__init__(image, adjacency)
         graph = self._get_adjacency_graph()
         self._tree, self._alt = hg.component_tree_min_tree(graph, image)
-
-

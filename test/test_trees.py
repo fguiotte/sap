@@ -19,3 +19,4 @@ def test_MaxTree_constructor(image, adjacency):
 @pytest.mark.parametrize('adjacency', [4, 8])
 def test_MinTree_constructor(image, adjacency):
     t = sap.MinTree(image, adjacency)
+

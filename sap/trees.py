@@ -7,13 +7,14 @@
 Trees
 =====
 
-This submodule contain the component tree helpers.
+This submodule contains the component tree classes.
 
 Example
 -------
 
-Basic creation of a tree and area filtering of an image with the
-MaxTree:
+Simple creation of the max-tree of an image, compute the area attributes
+of the nodes and reconstruct a filtered image removing nodes with area
+less than 100 pixels:
 
 >>>  t = sap.MaxTree(image)
 >>>  area = t.get_attribute('area')
@@ -22,6 +23,7 @@ MaxTree:
 """
 
 import higra as hg
+import inspect
 
 class Tree:
     """Tree
@@ -32,10 +34,10 @@ class Tree:
     Parameters
     ----------
     image: ndarray
-        The image to be represented with the tree structure.
+        The image to be represented by the tree structure.
     adjacency: int
-        The pixel connectivity to use during the tree creation.
-        Determines the number of pixels to be taken into account in the
+        The pixel connectivity to use during the tree creation. It
+        determines the number of pixels to be taken into account in the
         neighborhood of each pixel. The allowed adjacency are 4 or 8.
         Default is 4.
 
@@ -56,24 +58,28 @@ class Tree:
             raise NotImplementedError('adjacency of {} is not '
                     'implemented.'.format(self._adjacency))
 
-    def get_attribute(self, attribute):
+    def get_attribute(self, attribute_name):
         """Get attribute values of the tree nodes
 
-        Details of the function.
+        The attributes depends of Higra's
 
         Parameters
         ------
-        attribute: str
+        attribute_name: str
             Name of the attribute. Can be 'area' or 'comptactness' for
             exemple.
 
         Returns
         -------
-        attribute: ndarray
+        attribute_values: ndarray
             The values of attribute for each nodes.
 
+        See also
+        --------
+        TODO: list available attributes
+
         """
-        compute = getattr(hg, 'attribute_' + attribute)
+        compute = getattr(hg, 'attribute_' + attribute_name)
         args = {}
         if 'altitudes' in inspect.signature(compute).parameters:
             args['altitudes'] = self._alt

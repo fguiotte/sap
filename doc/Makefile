@@ -15,8 +15,11 @@ help:
 
 .PHONY: help Makefile
 
+clean:
+	rm -rf source _build
+
 autogen:
-	rm -r source; sphinx-apidoc ../sap -o source -eMT #E
+	sphinx-apidoc ../sap -o source -EeMT
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

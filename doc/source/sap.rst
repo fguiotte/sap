@@ -1,6 +1,3 @@
-sap package
-===========
-
 .. automodule:: sap
    :members:
    :undoc-members:

@@ -13,16 +13,16 @@ Simple Attribute Profiles's documentation
     info/start
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     :caption: API
 
-    sap <source/sap>
-    sap.trees <source/sap.trees>
+    SAP <source/sap>
 
 .. toctree::
     :caption: Links
 
     Source code <https://gitlab.inria.fr/fguiotte/sap>
+    Issue tracker <https://gitlab.inria.fr/fguiotte/sap/issues>
     Pypi package <https://pypi.org/project/sap/>
 
 

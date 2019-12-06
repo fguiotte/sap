@@ -22,6 +22,7 @@ Simple Attribute Profiles's documentation
     :caption: Links
 
     Source code <https://gitlab.inria.fr/fguiotte/sap>
+    Issue tracker <https://gitlab.inria.fr/fguiotte/sap/issues>
     Pypi package <https://pypi.org/project/sap/>
 
 

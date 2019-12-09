@@ -23,6 +23,7 @@ less than 100 pixels:
 """
 
 import higra as hg
+import numpy as np
 import inspect
 
 class Tree:
@@ -75,8 +76,6 @@ class Tree:
         <https://higra.readthedocs.io/en/stable/python/tree_attributes.html>`_
         according to the appropriate higra's version.
 
-        Some parameters are default
-
         Example
         -------
         >>> sap.Tree.available_attributes()
@@ -97,7 +96,6 @@ class Tree:
                 attribute_param = \
                     list(filter(lambda x: x not in params_remove, attribute_param))
                 dict_of_attributes[attribute_name] = attribute_param
-                print(attribute_name, attribute_param)
         return dict_of_attributes
 
     def get_attribute(self, attribute_name, **kwargs):
@@ -154,19 +152,19 @@ class Tree:
 
         Parameters
         ----------
-        deleted_nodes : ndarray
-            Boolean array of node to delete.
+        deleted_nodes : ndarray or boolean
+            Boolean array of node to delete with `len(deleted_nodes) ==
+            tree.num_nodes()`.
         
         Returns
         -------
         filtered_image : ndarray
             The reconstructed image.
 
-        Todo
-        ----
-        Boolean, function or lambda as deleted_nodes parameter.
-
         """
+        if isinstance(deleted_nodes, bool):
+            deleted_nodes = np.array((deleted_nodes,) * self.num_nodes())
+
         return hg.reconstruct_leaf_data(self._tree, self._alt, deleted_nodes)
     
     def num_nodes(self):

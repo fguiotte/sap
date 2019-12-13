@@ -13,7 +13,7 @@ Simple Attribute Profiles's documentation
     info/start
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: API
 
     SAP <source/sap>

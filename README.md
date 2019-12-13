@@ -40,3 +40,8 @@ plt.imshow(filtered_image)
 plt.show()
 ```
 
+## Develop status
+
+[![build status](https://gitlab.inria.fr/fguiotte/sap/badges/develop/pipeline.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/develop)
+[![coverage report](https://gitlab.inria.fr/fguiotte/sap/badges/develop/coverage.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/develop)
+[![Documentation Status](https://readthedocs.org/projects/python-sap/badge/?version=develop)](https://python-sap.readthedocs.io/en/latest/?badge=develop)

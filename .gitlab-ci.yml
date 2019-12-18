@@ -18,9 +18,11 @@ test:
 coverage:
   stage: test
   script:
+    - pip install .
     - pip install coverage pytest
     - coverage run --source=sap -m pytest
     - coverage report -m
+  coverage: /\d+\%\s*$/
 
 deploy:
   stage: deploy

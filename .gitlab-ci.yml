@@ -1,4 +1,19 @@
-test:
+stages:
+  - install
+  - test
+  - deploy
+
+install:
+  stage: install
   script:
-    - hostname
-    - whoami
+    - pip install .
+
+test:
+  stage: test
+  script:
+    - pip install pytest
+    - pytest
+
+deploy:
+  script:
+    - python setup.py sdist bdist_wheel

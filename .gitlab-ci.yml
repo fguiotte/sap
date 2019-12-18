@@ -18,6 +18,7 @@ test:
 coverage:
   stage: test
   script:
+    - pip install coverage pytest
     - coverage run --source=sap -m pytest
     - coverage report -m
 

@@ -11,9 +11,18 @@ install:
 test:
   stage: test
   script:
+    - pip install .
     - pip install pytest
     - pytest
 
+coverage:
+  stage: test
+  script:
+    - echo maybe later
+
 deploy:
+  stage: deploy
   script:
     - python setup.py sdist bdist_wheel
+  only:
+    - master

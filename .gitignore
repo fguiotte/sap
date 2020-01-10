@@ -3,3 +3,5 @@ dist/
 *.egg*/
 __pycache__/
 _build/
+pytest.ini
+.coverage

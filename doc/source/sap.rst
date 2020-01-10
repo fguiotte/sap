@@ -1,3 +1,6 @@
+sap package
+===========
+
 .. automodule:: sap
    :members:
    :undoc-members:
@@ -8,4 +11,5 @@ Submodules
 
 .. toctree::
 
+   sap.profiles
    sap.trees

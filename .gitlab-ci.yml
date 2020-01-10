@@ -1,43 +1,32 @@
-image: python:latest
+stages:
+  - install
+  - test
+  - deploy
 
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-
-cache:
-  paths:
-    - .cache/pip
-    - venv/
-
-before_script:
-  - python -V  # Print out python version for debugging
-  - pip install virtualenv
-  - virtualenv venv
-  - source venv/bin/activate
+install:
+  stage: install
+  script:
+    - pip install .
 
 test:
+  stage: test
   script:
-#    - python setup.py test
-    - pip install tox flake8 pytest # you can also use tox
+    - pip install .
+    - pip install pytest
     - pytest
-    - tox -e py36,flake8
 
-run:
+coverage:
+  stage: test
   script:
-    - python setup.py bdist_wheel
-    # an alternative approach is to install and run:
-    - pip install dist/*
-    # run the command here
-  artifacts:
-    paths:
-      - dist/*.whl
+    - pip install .
+    - pip install coverage pytest
+    - coverage run --source=sap -m pytest
+    - coverage report -m
+  coverage: /\d+\%\s*$/
 
-#pages:
-#  script:
-#    - pip install sphinx sphinx-rtd-theme
-#    - cd doc ; make html
-#    - mv build/html/ ../public/
-#  artifacts:
-#    paths:
-#      - public
-#  only:
-#    - master
+deploy:
+  stage: deploy
+  script:
+    - python setup.py sdist bdist_wheel
+  only:
+    - master

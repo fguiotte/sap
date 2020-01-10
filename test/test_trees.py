@@ -65,4 +65,12 @@ def test_reconstruct(max_tree, image):
     filtered_image = max_tree.reconstruct(deleted_nodes)
     assert (filtered_image == image).all(), 'Did not returned the same input image'
 
+    deleted_nodes = np.ones(max_tree.num_nodes(), dtype=np.bool)
+    filtered_image = max_tree.reconstruct(deleted_nodes)
+    assert (filtered_image == 0).all(), 'Did not returned the filtered image'
 
+    filtered_image = max_tree.reconstruct()
+    assert (filtered_image == image).all(), 'Default input not working'
+
+    filtered_image = max_tree.reconstruct(False)
+    assert (filtered_image == image).all(), 'Boolean input not working'

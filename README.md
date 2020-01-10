@@ -3,7 +3,7 @@
 
 [![build status](https://gitlab.inria.fr/fguiotte/sap/badges/master/pipeline.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/master)
 [![coverage report](https://gitlab.inria.fr/fguiotte/sap/badges/master/coverage.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/master)
-[![Documentation Status](https://readthedocs.org/projects/python-sap/badge/?version=master)](https://python-sap.readthedocs.io/en/latest/?badge=master)
+[![Documentation Status](https://readthedocs.org/projects/python-sap/badge/?version=master)](https://python-sap.readthedocs.io/en/master)
 
 
 SAP is a Python package to easily compute morphological attribute
@@ -40,3 +40,8 @@ plt.imshow(filtered_image)
 plt.show()
 ```
 
+## Develop status
+
+[![build status](https://gitlab.inria.fr/fguiotte/sap/badges/develop/pipeline.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/develop)
+[![coverage report](https://gitlab.inria.fr/fguiotte/sap/badges/develop/coverage.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/develop)
+[![Documentation Status](https://readthedocs.org/projects/python-sap/badge/?version=develop)](https://python-sap.readthedocs.io/en/develop)

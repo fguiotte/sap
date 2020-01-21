@@ -26,6 +26,51 @@ import higra as hg
 import numpy as np
 import inspect
 
+def available_attributes():
+    """
+    Return a dictionary of available attributes and parameters.
+
+    Returns
+    -------
+    dict_of_attributes : dict
+        The names of available attributes and parameters required.
+        The names are keys (str) and the parameters are values (list
+        of str) of the dictionary.
+
+    See Also
+    --------
+    get_attribute : Return the attribute values of the tree nodes.
+
+    Notes
+    -----
+    The list of available attributes is generated dynamically. It is
+    dependent of higra's installed version. For more details, please
+    refer to `higra documentation
+    <https://higra.readthedocs.io/en/stable/python/tree_attributes.html>`_
+    according to the appropriate higra's version.
+
+    Example
+    -------
+    >>> sap.available_attributes()
+    {'area': ['vertex_area=None', 'leaf_graph=None'],
+     'compactness': ['area=None', 'contour_length=None', ...],
+     ...
+     'volume': ['altitudes', 'area=None']}
+
+    """
+    params_remove = ['tree']
+    dict_of_attributes = {}
+    for x in inspect.getmembers(hg):
+        if x[0].startswith('attribute_'):
+            attribute_name = x[0].replace('attribute_', '')
+            attribute_param = \
+                [str(x) for x in inspect.signature(x[1]).parameters.values()]
+            if attribute_param[0] != 'tree': continue
+            attribute_param = \
+                list(filter(lambda x: x not in params_remove, attribute_param))
+            dict_of_attributes[attribute_name] = attribute_param
+    return dict_of_attributes
+
 class Tree:
     """
     Abstract class for tree representations of images.
@@ -85,18 +130,7 @@ class Tree:
          'volume': ['altitudes', 'area=None']}
 
         """
-        params_remove = ['tree']
-        dict_of_attributes = {}
-        for x in inspect.getmembers(hg):
-            if x[0].startswith('attribute_'):
-                attribute_name = x[0].replace('attribute_', '')
-                attribute_param = \
-                    [str(x) for x in inspect.signature(x[1]).parameters.values()]
-                if attribute_param[0] != 'tree': continue
-                attribute_param = \
-                    list(filter(lambda x: x not in params_remove, attribute_param))
-                dict_of_attributes[attribute_name] = attribute_param
-        return dict_of_attributes
+        return available_attributes()
 
     def get_attribute(self, attribute_name, **kwargs):
         """

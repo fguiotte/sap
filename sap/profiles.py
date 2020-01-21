@@ -66,6 +66,13 @@ class Profiles:
     def __repr__(self):
         return 'Profiles' + pformat(self.description)
 
+    def __iter__(self):
+        for data, description in zip(self.data, self.description):
+            yield Profiles([data], [description])
+
+    def __len__(self):
+        return len(self.data)
+
 
 def attribute_profiles(image, attribute, adjacency=4, image_name=None):
     """

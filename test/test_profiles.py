@@ -12,6 +12,11 @@ import numpy as np
 def image():
     return np.arange(100 * 100).reshape(100, 100)
 
+@pytest.fixture
+def profiles(image):
+    return sap.attribute_profiles(image, {'area': [10, 100],
+                                          'compactness': [.1, .5]})
+
 @pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles', 
         [(4, {'area': [10, 100]}, 1, (5,)), 
          (8, {'area': [10, 100]}, 1, (5,)),
@@ -27,4 +32,11 @@ def test_attribute_profiles(image, attribute, adjacency,
 
     for ap, ep in zip(aps.data, exptd_profiles):
         assert ap.shape[0] == ep, 'Expected profiles count missmatch'
+
+def test_profiles_iter(profiles):
+    n = len(profiles)
+    i = 0
+    for profile in profiles:
+        i += 1
+    assert n == i, 'Wrong number of profiles expected in iter'
 

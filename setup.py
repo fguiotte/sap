@@ -29,5 +29,7 @@ setuptools.setup(
         'numpy',
         'higra',
         'tqdm',
+        'matplotlib',
+        'pathlib'
     ],
 )

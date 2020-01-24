@@ -27,11 +27,11 @@ def test_attribute_profiles(image, attribute, adjacency,
 
     aps = sap.attribute_profiles(image, attribute, adjacency)
 
-    assert len(aps.data) == len(aps.description) == exptd_stacks, \
-    'Expected description and data missmatch'
+    assert len(aps) == exptd_stacks, \
+    'Expected stacks missmatch'
 
-    for ap, ep in zip(aps.data, exptd_profiles):
-        assert ap.shape[0] == ep, 'Expected profiles count missmatch'
+    for ap, ep in zip(aps, exptd_profiles):
+        assert ap.data.shape[0] == ep, 'Expected profiles count missmatch'
 
 def test_profiles_iter(profiles):
     n = len(profiles)
@@ -39,4 +39,3 @@ def test_profiles_iter(profiles):
     for profile in profiles:
         i += 1
     assert n == i, 'Wrong number of profiles expected in iter'
-

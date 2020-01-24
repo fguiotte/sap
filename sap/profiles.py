@@ -38,6 +38,8 @@ Names:
 import numpy as np
 from tqdm.auto import tqdm
 from pprint import pformat
+from matplotlib import pyplot as plt
+from pathlib import Path
 from . import trees
 
 class Profiles:
@@ -57,8 +59,9 @@ class Profiles:
         if len(data) != len(description):
             raise AttributeError('Data and description missmatch.')
 
-        self.data = data
-        self.description = description
+        self.data = data if len(data) > 1 else data[0]
+        self.description = description if len(data) > 1 else description[0]
+        self.len = len(data)
 
     def __str__(self):
         return self.__repr__()
@@ -67,11 +70,14 @@ class Profiles:
         return 'Profiles' + pformat(self.description)
 
     def __iter__(self):
+        if self.len == 1:
+            return self
+
         for data, description in zip(self.data, self.description):
             yield Profiles([data], [description])
 
     def __len__(self):
-        return len(self.data)
+        return self.len
 
 
 def attribute_profiles(image, attribute, adjacency=4, image_name=None):
@@ -104,6 +110,12 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
                  {'operation': 'copy'},
                  {'operation': 'close', 'threshold': 10},
                  {'operation': 'close', 'threshold': 100}]}]
+
+    See Also
+    --------
+    sap.trees.available_attributes : List available attributes.
+
+
 
     """
     data = []
@@ -155,4 +167,84 @@ def _compute_profiles(tree, attribute, thresholds, operation, tqs):
         data += [tree.reconstruct(deleted_nodes)]
 
     return data, desc
+
+def show_profiles(profiles, attribute=None, subplot=True, height=4, fname=None, **kwargs):
+    """Display profiles with matplotlib.
+    
+    Parameters
+    ----------
+    profiles : sap.Profiles
+        The profiles to display.
+    attribute : optional
+        Name of attribute to display. If None then display all the
+        attributes containde in profiles.
+    subplot : bool, optional, default: True
+        When true use only one figure to display all the profiles.     
+    height : scalar, optional, default: 4
+        Height in inches.
+    fname : str or PathLike, optional
+        If set, the file path to save the figure.
+    
+    Notes
+    -----
+    
+    
+    """
+    # Filter profiles according to attribute if attribute is set
+    if attribute:
+        profiles = filter(lambda x: x.description['attribute'] == attribute, profiles)
+        
+    # Keep a copy of kwargs for each profile to display
+    kwargs_save = kwargs.copy()
+    
+    for p in profiles:
+        kwargs = kwargs_save.copy()
+        # Set vmin and vmax if not set
+        if not 'vmin' in kwargs:
+            kwargs['vmin'] = p.data.min()
+        if not 'vmax' in kwargs:
+            kwargs['vmax'] = p.data.max()
+
+        suptitle = '{} - {}'.format(p.description['image'], p.description['attribute'])
+        print(suptitle)
+        if subplot:
+            plt.figure(figsize=_figsize(p, height, subplot))
+        for i, (im, profile) in enumerate(zip(p.data, p.description['profiles'])):
+            if subplot:
+                plt.subplot(1, len(p.data), i+1)
+            else:
+                plt.figure(figsize=_figsize(p, height, subplot))
+            plt.imshow(im, **kwargs)
+            plt.title(_title(profile))
+            if not subplot:
+                if fname:
+                    fname = Path(fname)
+                    fn = fname.parent / Path(fname.stem + '_{}_{}'.format(p.description['attribute'], 
+                         _title(profile).replace(' ', '_')) + fname.suffix)
+                    plt.savefig(fn)
+                plt.show()
+        if subplot:
+            plt.tight_layout()
+            plt.suptitle(suptitle)
+            if fname:
+                fname = Path(fname)
+                fn = fname.parent / Path(fname.stem + '_{}'.format(p.description['attribute']) + fname.suffix)
+                plt.savefig(fn)
+            plt.show()
+
+def _figsize(profiles, height, subplot):
+    """Compute size of fig given height and subplot."""
+    shape = profiles.data.shape[1:]
+    count = profiles.data.shape[0]
+    hw_ratio = shape[1] / shape[0]
+    width = height * hw_ratio if not subplot else height * hw_ratio * count
+    return (width, (1 + .1 * subplot) * height)
+    
+def _title(profile):
+    """Process a title of a fig."""
+    if profile['operation'] == 'differential':
+        p1, p2 = profile['profiles']
+        return 'differential ({}, {})'.format(title(p1), title(p2))
+    else:
+        return ' '.join([str(x) for x in profile.values()])
 

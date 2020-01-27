@@ -71,7 +71,8 @@ class Profiles:
 
     def __iter__(self):
         if self.len == 1:
-            return self
+            yield self
+            return
 
         for data, description in zip(self.data, self.description):
             yield Profiles([data], [description])
@@ -80,7 +81,21 @@ class Profiles:
         return self.len
 
     def __getitem__(self, key):
+        if self.len == 1 and key == 0:
+            return self
+         
         return Profiles([self.data[key]], [self.description[key]])
+    
+    def diff(self):
+        """Compute the differential of profiles.
+
+        Returns
+        -------
+        differential : Profiles
+            The processed differential profiles.
+        
+        """
+        return differential(self)
 
 
 def attribute_profiles(image, attribute, adjacency=4, image_name=None):
@@ -201,7 +216,7 @@ def show_all_profiles(profiles, attribute=None, image=None, height=None, fname=N
     
     Parameters
     ----------
-    profiles : sap.Profiles
+    profiles : sap.profiles.Profiles
         The profiles to display.
     attribute : sring, optional
         Name of attribute to display. By default display all the
@@ -239,12 +254,39 @@ def show_all_profiles(profiles, attribute=None, image=None, height=None, fname=N
     for p in profiles:
         show_profiles(p, height, fname, **kwargs)
 
+def differential(profiles):
+    """Compute the differential of profiles.
+
+    Parameters
+    ----------
+    profiles : Profiles
+        Attribute profiles or other profiles to process the differential
+        on. 
+    
+    Returns
+    -------
+    differential : Profiles
+        The processed differential profiles.
+    
+    """
+    new_data = []
+    new_desc = []
+
+    for p in profiles:
+        new_data += [p.data[:-1] - p.data[1:]]
+        new_desc += [p.description.copy()]
+        d = new_desc[-1]
+        d['profiles'] = [{'operation': 'differential', 
+                          'profiles': [x, y]} for x, y in zip(d['profiles'][:-1],
+                                                              d['profiles'][1:])]
+    return Profiles(new_data, new_desc)
+
 def show_profiles(profiles, height=None, fname=None, **kwargs):
     """Display a profiles stack with matplotlib.
     
     Parameters
     ----------
-    profiles : sap.Profiles
+    profiles : Profiles
         The profiles to display. Can be only of length 1.
     height : scalar, optional, default: None
         Height of the figure in inches. Automatically adjust the size of
@@ -273,7 +315,7 @@ def _title(profile):
     """Process a title of a fig."""
     if profile['operation'] == 'differential':
         p1, p2 = profile['profiles']
-        return 'differential ({}, {})'.format(title(p1), title(p2))
+        return 'differential ({}, {})'.format(_title(p1), _title(p2))
     else:
         return ' '.join([str(x) for x in profile.values()])
 

@@ -57,3 +57,9 @@ def test_show_profiles(profiles, params):
 def test_show_all_profiles(profiles, params):
     sap.show_all_profiles(profiles[0], **params)
     plt.close()
+
+def test_differential(profiles):
+    sap.differential(profiles)
+
+def test_profiles_m_diff(profiles):
+    profiles.diff()

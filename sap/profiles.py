@@ -118,8 +118,6 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
     --------
     sap.trees.available_attributes : List available attributes.
 
-
-
     """
     data = []
     description = []

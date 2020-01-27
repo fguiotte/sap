@@ -7,6 +7,7 @@
 import sap
 import pytest
 import numpy as np
+from matplotlib import pyplot as plt
 
 @pytest.fixture
 def image():
@@ -15,7 +16,8 @@ def image():
 @pytest.fixture
 def profiles(image):
     return sap.attribute_profiles(image, {'area': [10, 100],
-                                          'compactness': [.1, .5]})
+                                          'compactness': [.1, .5]},
+                                        image_name='image')
 
 @pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles', 
         [(4, {'area': [10, 100]}, 1, (5,)), 
@@ -33,6 +35,10 @@ def test_attribute_profiles(image, attribute, adjacency,
     for ap, ep in zip(aps, exptd_profiles):
         assert ap.data.shape[0] == ep, 'Expected profiles count missmatch'
 
+def test_attribute_profiles_assert(image):
+    with pytest.raises(AttributeError) as e:
+        sap.Profiles([image], [{}, {}, {}])
+
 def test_profiles_iter(profiles):
     n = len(profiles)
     i = 0
@@ -41,7 +47,13 @@ def test_profiles_iter(profiles):
     assert n == i, 'Wrong number of profiles expected in iter'
 
 
-@pytest.mark.parametrize('params', [{}, {'height': 4}])
+@pytest.mark.parametrize('params', [{}, {'height': 4}, {'fname': 'test.png'}])
 def test_show_profiles(profiles, params):
     sap.show_profiles(profiles[0], **params)
+    plt.close()
 
+@pytest.mark.parametrize('params', [{}, {'height': 4}, {'fname': 'test.png'},
+    {'image': 'image'}, {'attribute': 'area'}])
+def test_show_all_profiles(profiles, params):
+    sap.show_all_profiles(profiles[0], **params)
+    plt.close()

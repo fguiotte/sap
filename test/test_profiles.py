@@ -39,3 +39,9 @@ def test_profiles_iter(profiles):
     for profile in profiles:
         i += 1
     assert n == i, 'Wrong number of profiles expected in iter'
+
+
+@pytest.mark.parametrize('params', [{}, {'height': 4}])
+def test_show_profiles(profiles, params):
+    sap.show_profiles(profiles[0], **params)
+

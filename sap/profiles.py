@@ -79,6 +79,9 @@ class Profiles:
     def __len__(self):
         return self.len
 
+    def __getitem__(self, key):
+        return Profiles([self.data[key]], [self.description[key]])
+
 
 def attribute_profiles(image, attribute, adjacency=4, image_name=None):
     """
@@ -168,77 +171,105 @@ def _compute_profiles(tree, attribute, thresholds, operation, tqs):
 
     return data, desc
 
-def show_profiles(profiles, attribute=None, subplot=True, height=4, fname=None, **kwargs):
+def _show_profiles(profiles, height=None, fname=None, **kwargs):
+    assert len(profiles) == 1, 'Show profile only for one attribute at a time.'
+
+    # Set vmin and vmax if not set
+    if not 'vmin' in kwargs:
+        kwargs['vmin'] = profiles.data.min()
+    if not 'vmax' in kwargs:
+        kwargs['vmax'] = profiles.data.max()
+
+    if height is not None:
+        plt.figure(figsize=_figsize(profiles, height))
+
+    suptitle = '{} - {}'.format(profiles.description['image'], profiles.description['attribute'])
+
+    for i, (im, profile) in enumerate(zip(profiles.data, profiles.description['profiles'])):
+        plt.subplot(1, len(profiles.data), i+1)
+        plt.imshow(im, **kwargs)
+        plt.title(_title(profile))
+
+    plt.tight_layout()
+    plt.suptitle(suptitle)
+
+    if fname:
+        fname = Path(fname)
+        fn = fname.parent / Path(fname.stem + '_{}'.format(profiles.description['attribute']) + fname.suffix)
+        plt.savefig(fn)
+
+def show_all_profiles(profiles, attribute=None, image=None, height=None, fname=None, **kwargs):
     """Display profiles with matplotlib.
     
     Parameters
     ----------
     profiles : sap.Profiles
         The profiles to display.
-    attribute : optional
-        Name of attribute to display. If None then display all the
-        attributes containde in profiles.
-    subplot : bool, optional, default: True
-        When true use only one figure to display all the profiles.     
-    height : scalar, optional, default: 4
-        Height in inches.
+    attribute : sring, optional
+        Name of attribute to display. By default display all the
+        attributes contained in profiles.
+    image : string, optional
+        Name of the image to display. By default display the profiles of
+        all images.
+    height : scalar, optional, default: None
+        Height of the figure in inches. Automatically adjust the size of
+        the figure to display correctly the profiles and the title with
+        matplot.
     fname : str or PathLike, optional
-        If set, the file path to save the figure.
+        If set, the file path to save the figure. The attribute name is
+        automatically inserted in the file name.
     
+    See Also
+    --------
+    show_profiles : Display a profiles stack.
+
     Notes
     -----
-    
+    This is a utility function to call recursively `show_profiles`.
+    Attribute and image filters are available to filter the profiles to
+    display.
     
     """
+
     # Filter profiles according to attribute if attribute is set
     if attribute:
         profiles = filter(lambda x: x.description['attribute'] == attribute, profiles)
-        
-    # Keep a copy of kwargs for each profile to display
-    kwargs_save = kwargs.copy()
-    
+    # Same for image
+    if image:
+        profiles = filter(lambda x: x.description['image'] == image, profiles)
+
     for p in profiles:
-        kwargs = kwargs_save.copy()
-        # Set vmin and vmax if not set
-        if not 'vmin' in kwargs:
-            kwargs['vmin'] = p.data.min()
-        if not 'vmax' in kwargs:
-            kwargs['vmax'] = p.data.max()
+        show_profiles(p, height, fname, **kwargs)
 
-        suptitle = '{} - {}'.format(p.description['image'], p.description['attribute'])
-        print(suptitle)
-        if subplot:
-            plt.figure(figsize=_figsize(p, height, subplot))
-        for i, (im, profile) in enumerate(zip(p.data, p.description['profiles'])):
-            if subplot:
-                plt.subplot(1, len(p.data), i+1)
-            else:
-                plt.figure(figsize=_figsize(p, height, subplot))
-            plt.imshow(im, **kwargs)
-            plt.title(_title(profile))
-            if not subplot:
-                if fname:
-                    fname = Path(fname)
-                    fn = fname.parent / Path(fname.stem + '_{}_{}'.format(p.description['attribute'], 
-                         _title(profile).replace(' ', '_')) + fname.suffix)
-                    plt.savefig(fn)
-                plt.show()
-        if subplot:
-            plt.tight_layout()
-            plt.suptitle(suptitle)
-            if fname:
-                fname = Path(fname)
-                fn = fname.parent / Path(fname.stem + '_{}'.format(p.description['attribute']) + fname.suffix)
-                plt.savefig(fn)
-            plt.show()
+def show_profiles(profiles, height=None, fname=None, **kwargs):
+    """Display a profiles stack with matplotlib.
+    
+    Parameters
+    ----------
+    profiles : sap.Profiles
+        The profiles to display. Can be only of length 1.
+    height : scalar, optional, default: None
+        Height of the figure in inches. Automatically adjust the size of
+        the figure to display correctly the profiles and the title with
+        matplot.
+    fname : str or PathLike, optional
+        If set, the file path to save the figure. The attribute name is
+        automatically inserted in the file name.
 
-def _figsize(profiles, height, subplot):
-    """Compute size of fig given height and subplot."""
+    See Also
+    --------
+    show_profiles_all : Display several profiles at once.
+
+    """
+    _show_profiles(profiles, height, fname, **kwargs)
+
+def _figsize(profiles, height):
+    """Compute size of fig given height."""
     shape = profiles.data.shape[1:]
     count = profiles.data.shape[0]
     hw_ratio = shape[1] / shape[0]
-    width = height * hw_ratio if not subplot else height * hw_ratio * count
-    return (width, (1 + .1 * subplot) * height)
+    width = height * hw_ratio * count
+    return (width, 1.1 * height)
     
 def _title(profile):
     """Process a title of a fig."""

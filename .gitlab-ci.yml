@@ -28,5 +28,7 @@ deploy:
   stage: deploy
   script:
     - python setup.py sdist bdist_wheel
+    - twine -u $RUSER -p $RPASS upload dist/*
   only:
     - master
+    - twine

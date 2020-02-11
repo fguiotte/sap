@@ -1,32 +1,60 @@
+image: python:3.7
+
 stages:
   - install
-  - test
+  - quality
   - deploy
 
 install:
   stage: install
   script:
     - pip install .
+  only:
+    - branches
 
 test:
-  stage: test
+  stage: quality
   script:
     - pip install .
     - pip install pytest
     - pytest
+  only:
+    - branches
 
 coverage:
-  stage: test
+  stage: quality
   script:
     - pip install .
     - pip install coverage pytest
     - coverage run --source=sap -m pytest
     - coverage report -m
   coverage: /\d+\%\s*$/
+  only:
+    - branches
+
+doc:
+  stage: quality
+  script:
+    - echo paper please
+  only:
+    - branches
 
 deploy:
   stage: deploy
   script:
+    - pip install twine
     - python setup.py sdist bdist_wheel
+    - twine upload -u $RUSER -p $RPASS dist/*
+    - curl -X POST "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags" --header "PRIVATE-TOKEN:${TOKEN}" --data "tag_name=v$(python setup.py --version)&ref=${CI_COMMIT_REF_NAME}"
   only:
     - master
+
+pypi:
+  stage: install
+  when: delayed
+  start_in: '5 minutes'
+  script:
+    - pip install sap==${CI_COMMIT_REF_NAME}
+  only:
+    - tags
+

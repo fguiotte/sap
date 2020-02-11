@@ -34,10 +34,10 @@ doc:
 deploy:
   stage: deploy
   script:
-    - pip install twine
+   #- pip install twine
     - python setup.py sdist bdist_wheel
-    - twine upload -u $RUSER -p $RPASS dist/*
-    - curl -X POST "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags" --header "PRIVATE-TOKEN:${CI_PRIVATE_TOKEN}" --data "tag_name=$(python setup.py --version)&ref=${CI_COMMIT_REF_NAME}"
+   #- twine upload -u $RUSER -p $RPASS dist/*
+    - echo curl -X POST "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags" --header "PRIVATE-TOKEN:${CI_PRIVATE_TOKEN}" --data "tag_name=$(python setup.py --version)&ref=${CI_COMMIT_REF_NAME}"
     #- "curl -X POST -F token=$TOKEN -F ref=$CI_COMMIT_REF_NAME -F tag_name=v$(python setup.py --version) https://gitlab.inria.fr/api/v4/projects/17072/repository/tags"
   only:
     - master

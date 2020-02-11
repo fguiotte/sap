@@ -38,4 +38,3 @@ deploy:
     - curl --request POST --header "PRIVATE-TOKEN: $TOKEN" "https://gitlab.inria.fr/api/v4/projects/17072/repository/tags?tag_name=v$(python setup.py --version)&ref=$CI_COMMIT_REF_NAME"
   only:
     - master
-    - twine

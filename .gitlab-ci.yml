@@ -52,7 +52,7 @@ deploy:
 
 pypi:
   stage: install
-  scrip:
+  script:
     - pip install sap==${CI_COMMIT_REF_NAME}
   only:
     - tags

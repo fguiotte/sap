@@ -45,10 +45,9 @@ deploy:
     - pip install twine
     - python setup.py sdist bdist_wheel
     - twine upload -u $RUSER -p $RPASS dist/*
-    - curl -X POST "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags" --header "PRIVATE-TOKEN:${TOKEN}" --data "tag_name=$(python setup.py --version)&ref=${CI_COMMIT_REF_NAME}"
+    - curl -X POST "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags" --header "PRIVATE-TOKEN:${TOKEN}" --data "tag_name=v$(python setup.py --version)&ref=${CI_COMMIT_REF_NAME}"
   only:
     - master
-    - twine
 
 pypi:
   stage: install

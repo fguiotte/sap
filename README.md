@@ -4,6 +4,7 @@
 [![build status](https://gitlab.inria.fr/fguiotte/sap/badges/master/pipeline.svg)](https://gitlab.inria.fr/fguiotte/sap/pipelines/latest)
 [![coverage report](https://gitlab.inria.fr/fguiotte/sap/badges/master/coverage.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/master)
 [![Documentation Status](https://readthedocs.org/projects/python-sap/badge/?version=master)](https://python-sap.readthedocs.io/en/master)
+[![Pypi version](https://img.shields.io/pypi/v/sap.svg)](https://pypi.org/project/sap/)
 
 
 SAP is a Python package to easily compute morphological attribute

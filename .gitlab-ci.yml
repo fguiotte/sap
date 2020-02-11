@@ -52,6 +52,8 @@ deploy:
 
 pypi:
   stage: install
+  when: delayed
+  start_in: '60 seconds'
   script:
     - pip install sap==${CI_COMMIT_REF_NAME}
   only:

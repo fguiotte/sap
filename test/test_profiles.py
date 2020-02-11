@@ -8,6 +8,7 @@ import sap
 import pytest
 import numpy as np
 from matplotlib import pyplot as plt
+import tempfile
 
 @pytest.fixture
 def image():
@@ -48,13 +49,19 @@ def test_profiles_iter(profiles):
 
 
 @pytest.mark.parametrize('params', [{}, {'height': 4}, {'fname': 'test.png'}])
-def test_show_profiles(profiles, params):
+def test_show_profiles(profiles, params, tmpdir):
+    if 'fname' in params:
+        params['fname'] = tmpdir.join(params['fname'])
+
     sap.show_profiles(profiles[0], **params)
     plt.close()
 
 @pytest.mark.parametrize('params', [{}, {'height': 4}, {'fname': 'test.png'},
     {'image': 'image'}, {'attribute': 'area'}])
-def test_show_all_profiles(profiles, params):
+def test_show_all_profiles(profiles, params, tmpdir):
+    if 'fname' in params:
+        params['fname'] = tmpdir.join(params['fname'])
+
     sap.show_all_profiles(profiles[0], **params)
     plt.close()
 

@@ -29,7 +29,7 @@ deploy:
   script:
     - pip install twine
     - python setup.py sdist bdist_wheel
-    - twine -u $RUSER -p $RPASS upload dist/*
+    - twine upload -u $RUSER -p $RPASS dist/*
   only:
     - master
     - twine

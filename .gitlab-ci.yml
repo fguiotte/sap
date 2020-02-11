@@ -35,6 +35,7 @@ deploy:
     - pip install twine
     - python setup.py sdist bdist_wheel
     - twine upload -u $RUSER -p $RPASS dist/*
-    - curl --request POST --header "PRIVATE-TOKEN: $TOKEN" "https://gitlab.inria.fr/api/v4/projects/17072/repository/tags?tag_name=v$(python setup.py --version)&ref=$CI_COMMIT_REF_NAME"
+    - "curl -X POST -F token=$TOKEN -F ref=$CI_COMMIT_REF_NAME -F tag_name=v$(python setup.py --version) https://gitlab.inria.fr/api/v4/projects/17072/repository/tags"
   only:
     - master
+    - twine

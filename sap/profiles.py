@@ -27,12 +27,6 @@ attributes.
 >>> eaps.vectorize()
 [[...]]
 
-Todo
-----
-
-Names:
-    - vectorize or concatenate ?
-
 """
 
 import numpy as np
@@ -99,6 +93,31 @@ class Profiles:
         
         """
         return differential(self)
+
+    def vectorize(self):
+        """Return the vectors of the profiles.
+
+        Returns
+        -------
+        vectors : numpy.ndarray
+            The vectors of the profiles.
+
+        See Also
+        --------
+        vectorize : get the vectors of profiles.
+
+        Example
+        -------
+
+        >>> image = np.random.random((100, 100))
+        >>> aps = sap.attribute_profiles(image, {'area': [10, 100]})
+        >>> vectors = aps.vectorize()
+        >>> vectors.shape
+        (5, 100, 100)
+
+        """
+        return vectorize(self)
+
 
 
 def attribute_profiles(image, attribute, adjacency=4, image_name=None):
@@ -329,7 +348,7 @@ def concatenate(sequence):
 
     Parameters
     ----------
-    profiles_1, profiles_2, ... : sequence of Profiles
+    sequence : sequence of Profiles
         The sequence of profiles to concatenate.
 
     Returns
@@ -350,3 +369,36 @@ def concatenate(sequence):
 
     return Profiles([x.data for y in sequence for x in y],
                     [x.description for y in sequence for x in y])
+
+def vectorize(profiles):
+    """Return the vectors of the profiles.
+
+    Parameters
+    ----------
+    profiles : Profiles
+        Profiles on which process the vectors.
+
+    Returns
+    -------
+    vectors : numpy.ndarray
+        The vectors of the profiles.
+
+    See Also
+    --------
+    Profiles.vectorize : get the vectors of profiles. 
+
+    Example
+    -------
+
+    >>> image = np.random.random((100, 100))
+    >>> aps = sap.attribute_profiles(image, {'area': [10, 100]})
+    >>> vectors = sap.vectorize(aps)
+    >>> vectors.shape
+    (5, 100, 100)
+
+    """
+    if not isinstance(profiles, Profiles):
+        raise Exception
+
+    return np.concatenate(profiles.data)
+

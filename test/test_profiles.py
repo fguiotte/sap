@@ -103,3 +103,14 @@ def test_profiles_iadd(profiles, profiles_b):
     assert len(np) == len(profiles) + len(profiles_b)
     assert (profiles_b[-1].data == np[-1].data).all(), 'Data do not correspond'
 
+def test_vectorize(profiles):
+    vectors = sap.vectorize(profiles)
+
+    assert len(vectors) == sum([len(x.data) for x in profiles]), 'Length of\
+    vectors mismatch'
+
+def test_profiles_vectorize(profiles):
+    vectors = profiles.vectorize()
+
+    assert len(vectors) == sum([len(x.data) for x in profiles]), 'Length of\
+    vectors mismatch'

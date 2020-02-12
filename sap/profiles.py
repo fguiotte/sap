@@ -86,6 +86,9 @@ class Profiles:
          
         return Profiles([self.data[key]], [self.description[key]])
     
+    def __add__(self, other):
+        return concatenate((self, other))
+    
     def diff(self):
         """Compute the differential of profiles.
 
@@ -319,3 +322,31 @@ def _title(profile):
     else:
         return ' '.join([str(x) for x in profile.values()])
 
+def concatenate(sequence):
+    """concatenate((profiles_1, profiles_2, ...))
+
+    Concatenate a sequence of profiles.
+
+    Parameters
+    ----------
+    profiles_1, profiles_2, ... : sequence of Profiles
+        The sequence of profiles to concatenate.
+
+    Returns
+    -------
+    profiles : Profiles
+        The concatenated profiles.
+
+    Examples
+    --------
+
+    >>> aps_a = sap.attribute_profiles(image, {'area': [10, 100]})
+    >>> aps_b = sap.attribute_profiles(image, {'compactness': [.1, .5]})
+    >>> aps = sap.concatenate((aps_a, aps_b))
+    >>> len(aps) == len(aps_a) + len(aps_b)
+    True
+
+    """
+
+    return Profiles([x.data for y in sequence for x in y],
+                    [x.description for y in sequence for x in y])

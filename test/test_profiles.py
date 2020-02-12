@@ -19,9 +19,14 @@ def profiles(image):
     return sap.attribute_profiles(image, {'area': [10, 100],
                                           'compactness': [.1, .5]},
                                         image_name='image')
+@pytest.fixture
+def profiles_b(image):
+    return sap.attribute_profiles(image, {'area': [1000, 10000],
+                                          'height': [.1, .5]},
+                                        image_name='image b')
 
-@pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles', 
-        [(4, {'area': [10, 100]}, 1, (5,)), 
+@pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles',
+        [(4, {'area': [10, 100]}, 1, (5,)),
          (8, {'area': [10, 100]}, 1, (5,)),
          (4, {'compactness': [.1, .5], 'volume': [100, 5000, 1000]}, 2, (5, 7))
         ])
@@ -70,3 +75,31 @@ def test_differential(profiles):
 
 def test_profiles_m_diff(profiles):
     profiles.diff()
+
+def test_concatenate(profiles, profiles_b):
+    np = sap.concatenate((profiles, profiles_b))
+    assert  len(np) == len(profiles) + len(profiles_b), 'Length mismatch \
+    with concatenated profiles'
+    assert (profiles[0].data == np[0].data).all(), 'Data do not correspond'
+
+    single_profile = profiles[0]
+    nps = sap.concatenate((single_profile, profiles_b))
+    assert len(nps) == 1 + len(profiles_b), 'Concatenate with profiles of \
+    length 1 error'
+
+    sap.concatenate((single_profile, profiles, profiles_b)), 'Concatenate more\
+            than 2 profiles'
+
+def test_profiles_add(profiles, profiles_b):
+    np = profiles + profiles_b
+
+    assert len(np) == len(profiles) + len(profiles_b)
+    assert (profiles[0].data == np[0].data).all(), 'Data do not correspond'
+
+def test_profiles_iadd(profiles, profiles_b):
+    np = profiles
+    np += profiles_b
+
+    assert len(np) == len(profiles) + len(profiles_b)
+    assert (profiles_b[-1].data == np[-1].data).all(), 'Data do not correspond'
+

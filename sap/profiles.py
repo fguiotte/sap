@@ -276,7 +276,7 @@ def show_all_profiles(profiles, attribute=None, image=None, height=None, fname=N
     for p in profiles:
         show_profiles(p, height, fname, **kwargs)
 
-def strip_copy(profiles):
+def strip_profiles_copy(profiles):
     """Remove all the copied images in profiles.
 
     Copy are the original images where profiles are computed on.
@@ -291,8 +291,12 @@ def strip_copy(profiles):
     new_profiles : Profiles
         Copy of profiles without copied image.
 
+    See Also
+    --------
+    sap.strip_profiles : Filter profiles according to condition.
+
     """
-    return profiles
+    return strip_profiles(lambda x: x['operation'] == 'copy', profiles)
 
 def strip_profiles(condition, profiles):
     """strip_profiles(lambda x: x['operation'] != 'open', profiles)

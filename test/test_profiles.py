@@ -122,10 +122,10 @@ def test_strip_profiles(profiles):
         assert len(nap.data) == (len(ap.data) - 1) / 2, \
             'Open profiles should be half of all profiles minus one.'
 
-#def test_strip_copy(profiles):
-#    np = sap.strip_copy(profiles)
-#
-#    for p in profiles:
-#        assert not 'copy' in [x['operation'] for x in
-#            p.description['profiles']], 'There is a original image in\
-#            filtered profiles'
+def test_strip_profiles_copy(profiles):
+    np = sap.strip_profiles_copy(profiles)
+
+    for p in np:
+        assert not 'copy' in [x['operation'] for x in
+            p.description['profiles']], 'There is a original image in\
+            filtered profiles'

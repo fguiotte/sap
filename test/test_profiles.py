@@ -114,3 +114,18 @@ def test_profiles_vectorize(profiles):
 
     assert len(vectors) == sum([len(x.data) for x in profiles]), 'Length of\
     vectors mismatch'
+
+def test_strip_profiles(profiles):
+    np = sap.strip_profiles(lambda x: x['operation'] != 'open', profiles)
+
+    for nap, ap in zip(np, profiles):
+        assert len(nap.data) == (len(ap.data) - 1) / 2, \
+            'Open profiles should be half of all profiles minus one.'
+
+#def test_strip_copy(profiles):
+#    np = sap.strip_copy(profiles)
+#
+#    for p in profiles:
+#        assert not 'copy' in [x['operation'] for x in
+#            p.description['profiles']], 'There is a original image in\
+#            filtered profiles'

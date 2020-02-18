@@ -27,12 +27,6 @@ attributes.
 >>> eaps.vectorize()
 [[...]]
 
-Todo
-----
-
-Names:
-    - vectorize or concatenate ?
-
 """
 
 import numpy as np
@@ -86,6 +80,9 @@ class Profiles:
          
         return Profiles([self.data[key]], [self.description[key]])
     
+    def __add__(self, other):
+        return concatenate((self, other))
+    
     def diff(self):
         """Compute the differential of profiles.
 
@@ -96,6 +93,70 @@ class Profiles:
         
         """
         return differential(self)
+
+    def vectorize(self):
+        """Return the vectors of the profiles.
+
+        Refer to :func:`vectorize` for full documentation.
+
+        Returns
+        -------
+        vectors : numpy.ndarray
+            The vectors of the profiles.
+
+        See Also
+        --------
+        vectorize : equivalent function.
+
+        """
+        return vectorize(self)
+
+    def strip(self, condition):
+        """strip(lambda x: x['operation'] != 'open')
+
+        Remove profiles according to condition. Iteration is done on
+        profiles description.
+
+        Refer to :func:`strip_profiles` for full documentation.
+
+        Parameters
+        ----------
+        condition : function
+            The function (or lambda function) to use on profiles description
+            to filter the profiles.
+
+        Returns
+        -------
+        new_profiles : Profiles
+            Filtered profiles.
+
+        See Also
+        --------
+        strip_profiles : equivalent function
+        """
+        return strip_profiles(condition, self)
+    
+    def strip_copy(self):
+        """Remove all the copied images in profiles.
+
+        Refer to :func:`strip_profiles_copy` for full documentation.
+
+        Parameters
+        ----------
+        profiles : Profiles
+            The profiles to strip on the copied images.
+
+        Returns
+        -------
+        new_profiles : Profiles
+            Copy of profiles without copied image.
+
+        See Also
+        --------
+        strip_profiles_copy : equivalent function
+
+        """
+        return strip_profiles_copy(self)
 
 
 def attribute_profiles(image, attribute, adjacency=4, image_name=None):
@@ -254,6 +315,113 @@ def show_all_profiles(profiles, attribute=None, image=None, height=None, fname=N
     for p in profiles:
         show_profiles(p, height, fname, **kwargs)
 
+def strip_profiles_copy(profiles):
+    """Remove all the copied images in profiles.
+
+    Copy are the original images where profiles are computed on.
+
+    Parameters
+    ----------
+    profiles : Profiles
+        The profiles to strip on the copied images.
+
+    Returns
+    -------
+    new_profiles : Profiles
+        Copy of profiles without copied image.
+
+    See Also
+    --------
+    sap.strip_profiles : Filter profiles according to condition.
+
+    """
+    return strip_profiles(lambda x: x['operation'] == 'copy', profiles)
+
+def strip_profiles(condition, profiles):
+    """strip_profiles(lambda x: x['operation'] != 'open', profiles)
+
+    Remove profiles according to condition. Iteration is done on
+    profiles description (see Notes).
+
+    Parameters
+    ----------
+    condition : function
+        The function (or lambda function) to use on profiles description
+        to filter the profiles.
+    profiles : Profiles
+        The profiles to filter.
+
+    Returns
+    -------
+    new_profiles : Profiles
+        Filtered profiles.
+
+    Notes
+    -----
+
+    The condition is tested on the description of each profiles.
+    Considering this stack:
+
+    >>> aps
+    Profiles{'attribute': 'area',
+     'image': -8884649894275650052,
+     'profiles': [{'operation': 'open', 'threshold': 1000},
+                  {'operation': 'open', 'threshold': 100},
+                  {'operation': 'open', 'threshold': 10},
+                  {'operation': 'copy'},
+                  {'operation': 'close', 'threshold': 10},
+                  {'operation': 'close', 'threshold': 100},
+                  {'operation': 'close', 'threshold': 1000}]}
+
+    The condition function is tested on each item of the list
+    ``'profiles'``.
+
+    See Also
+    --------
+    Profiles.strip : Remove profiles based on condition.
+
+    Examples
+    --------
+
+    Strip profiles depending on thresholds level:
+
+    >>> image = np.random.random((100, 100))
+    >>> aps = sap.attribute_profiles(image, {'area': [10, 100, 1000]})
+    >>>
+    >>> sap.strip_profiles(lambda x: 'threshold' in x and x['threshold'] > 20, aps)
+    Profiles{'attribute': 'area',
+     'image': 2376333419322655105,
+     'profiles': [{'operation': 'open', 'threshold': 10},
+                  {'operation': 'copy'},
+                  {'operation': 'close', 'threshold': 10}]}
+
+    Strip profiles depending on operation:
+
+    >>> sap.strip_profiles(lambda x: x['operation'] == 'open', aps)
+    Profiles{'attribute': 'area',
+     'image': 2376333419322655105,
+     'profiles': [{'operation': 'copy'},
+                  {'operation': 'close', 'threshold': 10},
+                  {'operation': 'close', 'threshold': 100},
+                  {'operation': 'close', 'threshold': 1000}]}
+
+    """
+    new_profiles = []
+    for ap in profiles:
+        # Process the profile filter
+        prof_filter = [not condition(x) for x in ap.description['profiles']]
+        
+        # Create filtered description
+        new_desc = ap.description.copy()
+        new_desc['profiles'] = [p for p, f in zip(ap.description['profiles'], prof_filter) if f]
+        
+        # Filter the new data
+        new_data = ap.data[prof_filter]
+        
+        new_profiles += [Profiles([new_data], [new_desc])]
+        
+    return concatenate(new_profiles)
+
 def differential(profiles):
     """Compute the differential of profiles.
 
@@ -318,4 +486,68 @@ def _title(profile):
         return 'differential ({}, {})'.format(_title(p1), _title(p2))
     else:
         return ' '.join([str(x) for x in profile.values()])
+
+def concatenate(sequence):
+    """concatenate((profiles_1, profiles_2, ...))
+
+    Concatenate a sequence of profiles.
+
+    Parameters
+    ----------
+    sequence : sequence of Profiles
+        The sequence of profiles to concatenate.
+
+    Returns
+    -------
+    profiles : Profiles
+        The concatenated profiles.
+
+    Examples
+    --------
+
+    >>> aps_a = sap.attribute_profiles(image, {'area': [10, 100]})
+    >>> aps_b = sap.attribute_profiles(image, {'compactness': [.1, .5]})
+    >>>
+    >>> aps = sap.concatenate((aps_a, aps_b))
+    >>>
+    >>> len(aps) == len(aps_a) + len(aps_b)
+    True
+
+    """
+
+    return Profiles([x.data for y in sequence for x in y],
+                    [x.description for y in sequence for x in y])
+
+def vectorize(profiles):
+    """Return the classification vectors of the profiles.
+
+    Parameters
+    ----------
+    profiles : Profiles
+        Profiles on which process the vectors.
+
+    Returns
+    -------
+    vectors : numpy.ndarray
+        The vectors of the profiles.
+
+    See Also
+    --------
+    Profiles.vectorize : get the vectors of profiles. 
+
+    Example
+    -------
+
+    >>> image = np.random.random((100, 100))
+    >>> aps = sap.attribute_profiles(image, {'area': [10, 100]})
+    >>>
+    >>> vectors = sap.vectorize(aps)
+    >>> vectors.shape
+    (5, 100, 100)
+
+    """
+    if not isinstance(profiles, Profiles):
+        raise Exception
+
+    return np.concatenate(profiles.data)
 

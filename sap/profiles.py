@@ -97,6 +97,8 @@ class Profiles:
     def vectorize(self):
         """Return the vectors of the profiles.
 
+        Refer to :func:`vectorize` for full documentation.
+
         Returns
         -------
         vectors : numpy.ndarray
@@ -104,20 +106,57 @@ class Profiles:
 
         See Also
         --------
-        vectorize : get the vectors of profiles.
-
-        Example
-        -------
-
-        >>> image = np.random.random((100, 100))
-        >>> aps = sap.attribute_profiles(image, {'area': [10, 100]})
-        >>> vectors = aps.vectorize()
-        >>> vectors.shape
-        (5, 100, 100)
+        vectorize : equivalent function.
 
         """
         return vectorize(self)
 
+    def strip(self, condition):
+        """strip(lambda x: x['operation'] != 'open')
+
+        Remove profiles according to condition. Iteration is done on
+        profiles description.
+
+        Refer to :func:`strip_profiles` for full documentation.
+
+        Parameters
+        ----------
+        condition : function
+            The function (or lambda function) to use on profiles description
+            to filter the profiles.
+
+        Returns
+        -------
+        new_profiles : Profiles
+            Filtered profiles.
+
+        See Also
+        --------
+        strip_profiles : equivalent function
+        """
+        return strip_profiles(condition, self)
+    
+    def strip_copy(self):
+        """Remove all the copied images in profiles.
+
+        Refer to :func:`strip_profiles_copy` for full documentation.
+
+        Parameters
+        ----------
+        profiles : Profiles
+            The profiles to strip on the copied images.
+
+        Returns
+        -------
+        new_profiles : Profiles
+            Copy of profiles without copied image.
+
+        See Also
+        --------
+        strip_profiles_copy : equivalent function
+
+        """
+        return strip_profiles_copy(self)
 
 
 def attribute_profiles(image, attribute, adjacency=4, image_name=None):
@@ -349,11 +388,22 @@ def strip_profiles(condition, profiles):
     >>> image = np.random.random((100, 100))
     >>> aps = sap.attribute_profiles(image, {'area': [10, 100, 1000]})
     >>>
-    >>> sap.strip_profiles(lambda x: x['thresholds'] < 1000, aps)
+    >>> sap.strip_profiles(lambda x: 'threshold' in x and x['threshold'] > 20, aps)
+    Profiles{'attribute': 'area',
+     'image': 2376333419322655105,
+     'profiles': [{'operation': 'open', 'threshold': 10},
+                  {'operation': 'copy'},
+                  {'operation': 'close', 'threshold': 10}]}
 
     Strip profiles depending on operation:
 
     >>> sap.strip_profiles(lambda x: x['operation'] == 'open', aps)
+    Profiles{'attribute': 'area',
+     'image': 2376333419322655105,
+     'profiles': [{'operation': 'copy'},
+                  {'operation': 'close', 'threshold': 10},
+                  {'operation': 'close', 'threshold': 100},
+                  {'operation': 'close', 'threshold': 1000}]}
 
     """
     new_profiles = []

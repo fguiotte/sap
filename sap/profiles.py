@@ -387,7 +387,7 @@ def strip_profiles(condition, profiles):
 
     >>> image = np.random.random((100, 100))
     >>> aps = sap.attribute_profiles(image, {'area': [10, 100, 1000]})
-    >>>
+
     >>> sap.strip_profiles(lambda x: 'threshold' in x and x['threshold'] > 20, aps)
     Profiles{'attribute': 'area',
      'image': 2376333419322655105,
@@ -507,9 +507,9 @@ def concatenate(sequence):
 
     >>> aps_a = sap.attribute_profiles(image, {'area': [10, 100]})
     >>> aps_b = sap.attribute_profiles(image, {'compactness': [.1, .5]})
-    >>>
+
     >>> aps = sap.concatenate((aps_a, aps_b))
-    >>>
+
     >>> len(aps) == len(aps_a) + len(aps_b)
     True
 
@@ -540,7 +540,7 @@ def vectorize(profiles):
 
     >>> image = np.random.random((100, 100))
     >>> aps = sap.attribute_profiles(image, {'area': [10, 100]})
-    >>>
+
     >>> vectors = sap.vectorize(aps)
     >>> vectors.shape
     (5, 100, 100)

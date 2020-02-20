@@ -74,3 +74,17 @@ def test_reconstruct(max_tree, image):
 
     filtered_image = max_tree.reconstruct(False)
     assert (filtered_image == image).all(), 'Boolean input not working'
+
+def test_str(max_tree):
+    assert str(max_tree) == 'MaxTree{num_nodes: 20000, image.shape: (100, 100), image.dtype: int64}', \
+    '__str__ of Tree did not returned expected output'
+
+
+def test_io(max_tree, tmpdir):
+    save_file = tmpdir + '/tree.npz' 
+    sap.save(save_file, max_tree)
+
+    mt = sap.load(save_file)
+
+    assert str(mt) == str(max_tree), 'Loaded Tree is different than saved Tree'
+

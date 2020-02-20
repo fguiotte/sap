@@ -86,11 +86,8 @@ def save(file, tree):
     Examples
     --------
 
-    >>> from tempfile import TemporaryFile
-    >>> outfile = TemporaryFile()
-
     >>> mt = sap.MaxTree(np.random.random((100,100)))
-    >>> sap.save(outfile, mt)
+    >>> sap.save('tree.npz', mt)
 
     """
     tree_file = Path(tempfile.mkstemp()[1])
@@ -123,13 +120,10 @@ def load(file):
     Examples
     --------
 
-    >>> from tempfile import TemporaryFile
-    >>> outfile = TemporaryFile()
-
     >>> mt = sap.MaxTree(np.arange(10000).reshape(100,100))
-    >>> sap.save(outfile, mt)
+    >>> sap.save('tree.npz', mt)
 
-    >>> sap.load(outfile)
+    >>> sap.load('tree.npz')
     MaxTree{num_nodes: 20000, image.shape: (100, 100), image.dtype: int64}
 
     """

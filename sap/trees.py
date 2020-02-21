@@ -356,3 +356,33 @@ class MinTree(Tree):
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_min_tree(self._graph, self._image)
+
+class TosTree(Tree):
+    """
+    Tree of shapes, the local maxima values of the image are in leafs.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image to be represented by the tree structure.
+    adjacency : int
+        The pixel connectivity to use during the tree creation. It
+        determines the number of pixels to be taken into account in the
+        neighborhood of each pixel. The allowed adjacency are 4 or 8.
+        Default is 4.
+
+    Notes
+    -----
+    Inherits all the methods of `Tree` class.
+    
+    Todo
+    ----
+    - take into account adjacency
+
+    """
+    def __init__(self, image, adjacency=4):
+        super().__init__(image, adjacency)
+        
+    def _construct(self):
+        self._tree, self._alt = hg.component_tree_tree_of_shapes_image2d(self._image)
+

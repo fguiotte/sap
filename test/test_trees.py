@@ -16,6 +16,13 @@ def image():
 def max_tree(image):
     return sap.MaxTree(image)
 
+@pytest.fixture
+def min_tree(image):
+    return sap.MinTree(image)
+
+@pytest.fixture
+def tos_tree(image):
+    return sap.TosTree(image)
 
 @pytest.mark.parametrize('adjacency', [4, 8])
 def test_MaxTree_constructor(image, adjacency):
@@ -24,6 +31,9 @@ def test_MaxTree_constructor(image, adjacency):
 @pytest.mark.parametrize('adjacency', [4, 8])
 def test_MinTree_constructor(image, adjacency):
     t = sap.MinTree(image, adjacency)
+
+def test_TosTree_constructor(image):
+    t = sap.TosTree(image)
 
 def test_available_attributes(max_tree):
     att_dict = max_tree.available_attributes()

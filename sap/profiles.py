@@ -233,6 +233,72 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
 
     return Profiles(data, description)
 
+def self_dual_attribute_profiles(image, attribute, adjacency=4, image_name=None):
+    """
+    Compute the self dual attribute profiles of an image.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image
+    attribute : dict
+        Dictionary of attribute (as key, str) with according thresholds
+        (as values, number).
+    adjacency : int
+        Adjacency used for the tree construction. Default is 4.
+    image_name : str
+        The name of the image (optional). Useful to track filtering
+        process and display. If not set, the name is replaced by the
+        hash of the image.
+
+    Examples
+    --------
+
+    >>> image = np.random.random((100, 100))
+    >>> sap.self_dual_attribute_profiles(image, {'area': [10, 100]})
+    Profiles{'attribute': 'area',
+     'image': 2760575455804575354,
+     'profiles': [{'operation': 'copy'},
+                  {'operation': 'open close', 'threshold': 10},
+                  {'operation': 'open close', 'threshold': 100}]}
+    See Also
+    --------
+    sap.trees.available_attributes : List available attributes.
+    attribute_profiles : other profiles.
+
+    """
+    data = []
+    description = []
+
+    tos_tree = trees.TosTree(image, adjacency)
+
+    iter_count = sum(len(x) for x in attribute.values()) + len(attribute)
+    ttq = tqdm(desc='Total', total=iter_count)
+    for att, thresholds in attribute.items():
+        profiles = []; profiles_description = []
+        tq = tqdm(total=len(thresholds) + 1, desc=att)
+
+        # Origin
+        tq.update(); ttq.update()
+        profiles += [image]
+        profiles_description += [{'operation': 'copy'}]
+
+        # Filter
+        prof, desc = _compute_profiles(tos_tree, att, thresholds, 'open close', (ttq, tq))
+        profiles += prof
+        profiles_description += desc
+
+        tq.close()
+
+        data += [np.stack(profiles)]
+        description += [{'attribute': att, 
+                         'profiles': profiles_description,
+                         'image': image_name if image_name else
+                         hash(image.data.tobytes())}]
+    ttq.close()
+
+    return Profiles(data, description)
+
 def _compute_profiles(tree, attribute, thresholds, operation, tqs):
     data = []
     desc = []

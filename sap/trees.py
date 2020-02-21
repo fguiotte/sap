@@ -149,7 +149,7 @@ def load(file):
 
     tree._tree = hg.read_tree(str(tree_file))[0]
     tree._graph = hg.read_graph_pink(str(graph_file))[0]
-    
+
     return tree
 
 
@@ -158,7 +158,7 @@ class Tree:
     Abstract class for tree representations of images.
 
     Notes
-    ----- 
+    -----
     You should not instantiate class `Tree` directly, use `MaxTree` or
     `MinTree` instead.
 
@@ -282,7 +282,7 @@ class Tree:
         deleted_nodes : ndarray or boolean
             Boolean array of node to delete with `len(deleted_nodes) ==
             tree.num_nodes()`.
-        
+
         Returns
         -------
         filtered_image : ndarray
@@ -293,7 +293,7 @@ class Tree:
             deleted_nodes = np.array((deleted_nodes,) * self.num_nodes())
 
         return hg.reconstruct_leaf_data(self._tree, self._alt, deleted_nodes)
-    
+
     def num_nodes(self):
         """
         Return the node count of the tree.
@@ -374,7 +374,7 @@ class TosTree(Tree):
     Notes
     -----
     Inherits all the methods of `Tree` class.
-    
+
     Todo
     ----
     - take into account adjacency
@@ -382,7 +382,7 @@ class TosTree(Tree):
     """
     def __init__(self, image, adjacency=4):
         super().__init__(image, adjacency)
-        
+
     def _construct(self):
         self._tree, self._alt = hg.component_tree_tree_of_shapes_image2d(self._image)
 

@@ -91,7 +91,7 @@ def test_str(max_tree):
 
 
 def test_io(max_tree, tmpdir):
-    save_file = tmpdir + '/tree.npz' 
+    save_file = tmpdir + '/tree.npz'
     sap.save(save_file, max_tree)
 
     mt = sap.load(save_file)

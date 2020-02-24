@@ -132,11 +132,11 @@ def test_profiles_vectorize(profiles):
     vectors mismatch'
 
 def test_strip_profiles(profiles):
-    np = sap.strip_profiles(lambda x: x['operation'] != 'open', profiles)
+    np = sap.strip_profiles(lambda x: x['operation'] != 'thinning', profiles)
 
     for nap, ap in zip(np, profiles):
         assert len(nap.data) == (len(ap.data) - 1) / 2, \
-            'Open profiles should be half of all profiles minus one.'
+            'thinning profiles should be half of all profiles minus one.'
 
 def test_strip_profiles_copy(profiles):
     np = sap.strip_profiles_copy(profiles)
@@ -147,11 +147,11 @@ def test_strip_profiles_copy(profiles):
             filtered profiles'
 
 def test_profiles_strip(profiles):
-    np = profiles.strip(lambda x: x['operation'] != 'close')
+    np = profiles.strip(lambda x: x['operation'] != 'thickening')
 
     for nap, ap in zip(np, profiles):
         assert len(nap.data) == (len(ap.data) - 1) / 2, \
-            'Open profiles should be half of all profiles minus one.'
+            'thinning profiles should be half of all profiles minus one.'
 
 def test_profiles_strip_copy(profiles):
     np = profiles.strip_copy()

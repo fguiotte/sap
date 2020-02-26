@@ -102,6 +102,9 @@ def save(file, tree):
     with graph_file.open('rb') as f:
         graph_bytes = f.read()
 
+    tree_file.unlink()
+    graph_file.unlink()
+
     data = tree.__dict__.copy()
     data['_tree'] = tree_bytes
     data['_graph'] = graph_bytes
@@ -149,6 +152,9 @@ def load(file):
 
     tree._tree = hg.read_tree(str(tree_file))[0]
     tree._graph = hg.read_graph_pink(str(graph_file))[0]
+
+    tree_file.unlink()
+    graph_file.unlink()
 
     return tree
 

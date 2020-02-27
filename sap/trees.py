@@ -279,7 +279,7 @@ class Tree:
 
         return compute(self._tree, **kwargs)
 
-    def reconstruct(self, deleted_nodes=None):
+    def reconstruct(self, deleted_nodes=None, feature='altitude'):
         """
         Return the reconstructed image according to deleted nodes.
 
@@ -298,7 +298,10 @@ class Tree:
         if isinstance(deleted_nodes, bool):
             deleted_nodes = np.array((deleted_nodes,) * self.num_nodes())
 
-        return hg.reconstruct_leaf_data(self._tree, self._alt, deleted_nodes)
+        feature_value = self._alt if feature == 'altitude' else \
+            self.get_attribute(feature)
+
+        return hg.reconstruct_leaf_data(self._tree, feature_value, deleted_nodes)
 
     def num_nodes(self):
         """

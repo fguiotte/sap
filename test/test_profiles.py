@@ -57,6 +57,15 @@ def test_self_dual_attribute_profiles(image, attribute, adjacency,
     for ap, ep in zip(sdaps, exptd_profiles):
         assert ap.data.shape[0] == ep, 'Expected profiles count missmatch'
 
+@pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles',
+        [(4, {'area': [10, 100]}, 1, (3,)),
+         (8, {'area': [10, 100]}, 1, (3,)),
+         (4, {'compactness': [.1, .5], 'volume': [100, 5000, 1000]}, 2, (3, 4))
+        ])
+def test_feature_profiles(image, attribute, adjacency,
+        exptd_stacks, exptd_profiles):
+    pass
+
 def test_attribute_profiles_assert(image):
     with pytest.raises(AttributeError) as e:
         sap.Profiles([image], [{}, {}, {}])

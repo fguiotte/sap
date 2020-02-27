@@ -285,14 +285,40 @@ class Tree:
 
         Parameters
         ----------
-        deleted_nodes : ndarray or boolean
-            Boolean array of node to delete with `len(deleted_nodes) ==
-            tree.num_nodes()`.
+        deleted_nodes : ndarray or boolean, optional
+            Boolean array of nodes to delete. The length of the array should be
+            of same of node count.
+        feature : str, optional
+            The feature to be reconstructed. Can be any attribute of the
+            tree (see :func:`available_attributes`). The default is
+            `'altitude'`, the grey level of the node.
 
         Returns
         -------
         filtered_image : ndarray
             The reconstructed image.
+
+        Examples
+        --------
+        >>> image = np.arange(5 * 5).reshape(5, 5)
+        >>> mt = sap.MaxTree(image)
+
+        >>> mt.reconstruct()
+        array([[ 0,  1,  2,  3,  4],
+               [ 5,  6,  7,  8,  9],
+               [10, 11, 12, 13, 14],
+               [15, 16, 17, 18, 19],
+               [20, 21, 22, 23, 24]])
+        
+        >>> area = mt.get_attribute('area')
+
+        >>> mt.reconstruct(area > 10)
+        array([[ 0,  0,  0,  0,  0],
+               [ 0,  0,  0,  0,  0],
+               [ 0,  0,  0,  0,  0],
+               [15, 16, 17, 18, 19],
+               [20, 21, 22, 23, 24]])
+
 
         """
         if isinstance(deleted_nodes, bool):

@@ -41,6 +41,22 @@ def test_attribute_profiles(image, attribute, adjacency,
     for ap, ep in zip(aps, exptd_profiles):
         assert ap.data.shape[0] == ep, 'Expected profiles count missmatch'
 
+@pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles',
+        [(4, {'area': [10, 100]}, 1, (3,)),
+         (8, {'area': [10, 100]}, 1, (3,)),
+         (4, {'compactness': [.1, .5], 'volume': [100, 5000, 1000]}, 2, (3, 4))
+        ])
+def test_self_dual_attribute_profiles(image, attribute, adjacency,
+        exptd_stacks, exptd_profiles):
+
+    sdaps = sap.self_dual_attribute_profiles(image, attribute, adjacency)
+
+    assert len(sdaps) == exptd_stacks, \
+    'Expected stacks missmatch'
+
+    for ap, ep in zip(sdaps, exptd_profiles):
+        assert ap.data.shape[0] == ep, 'Expected profiles count missmatch'
+
 def test_attribute_profiles_assert(image):
     with pytest.raises(AttributeError) as e:
         sap.Profiles([image], [{}, {}, {}])
@@ -116,11 +132,11 @@ def test_profiles_vectorize(profiles):
     vectors mismatch'
 
 def test_strip_profiles(profiles):
-    np = sap.strip_profiles(lambda x: x['operation'] != 'open', profiles)
+    np = sap.strip_profiles(lambda x: x['operation'] != 'thinning', profiles)
 
     for nap, ap in zip(np, profiles):
         assert len(nap.data) == (len(ap.data) - 1) / 2, \
-            'Open profiles should be half of all profiles minus one.'
+            'thinning profiles should be half of all profiles minus one.'
 
 def test_strip_profiles_copy(profiles):
     np = sap.strip_profiles_copy(profiles)
@@ -131,11 +147,11 @@ def test_strip_profiles_copy(profiles):
             filtered profiles'
 
 def test_profiles_strip(profiles):
-    np = profiles.strip(lambda x: x['operation'] != 'close')
+    np = profiles.strip(lambda x: x['operation'] != 'thickening')
 
     for nap, ap in zip(np, profiles):
         assert len(nap.data) == (len(ap.data) - 1) / 2, \
-            'Open profiles should be half of all profiles minus one.'
+            'thinning profiles should be half of all profiles minus one.'
 
 def test_profiles_strip_copy(profiles):
     np = profiles.strip_copy()

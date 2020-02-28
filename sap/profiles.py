@@ -112,7 +112,7 @@ class Profiles:
         return vectorize(self)
 
     def strip(self, condition):
-        """strip(lambda x: x['operation'] != 'open')
+        """strip(lambda x: x['operation'] != 'thinning')
 
         Remove profiles according to condition. Iteration is done on
         profiles description.
@@ -184,11 +184,11 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
     >>> sap.attribute_profiles(image, {'area': [10, 100]})
     Profiles[{'attribute': 'area',
     'image': 6508374204896978831,
-    'profiles': [{'operation': 'open', 'threshold': 100},
-                 {'operation': 'open', 'threshold': 10},
+    'profiles': [{'operation': 'thinning', 'threshold': 100},
+                 {'operation': 'thinning', 'threshold': 10},
                  {'operation': 'copy'},
-                 {'operation': 'close', 'threshold': 10},
-                 {'operation': 'close', 'threshold': 100}]}]
+                 {'operation': 'thickening', 'threshold': 10},
+                 {'operation': 'thickening', 'threshold': 100}]}]
 
     See Also
     --------
@@ -207,8 +207,8 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
         profiles = []; profiles_description = []
         tq = tqdm(total=len(thresholds) * 2 + 1, desc=att)
 
-        # Open
-        prof, desc = _compute_profiles(min_tree, att, thresholds[::-1], 'open', (ttq, tq))
+        # thinning
+        prof, desc = _compute_profiles(min_tree, att, thresholds[::-1], 'thinning', (ttq, tq))
         profiles += prof
         profiles_description += desc
 
@@ -217,8 +217,8 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
         profiles += [image]
         profiles_description += [{'operation': 'copy'}]
 
-        # Close
-        prof, desc = _compute_profiles(max_tree, att, thresholds, 'close', (ttq, tq))
+        # thickening
+        prof, desc = _compute_profiles(max_tree, att, thresholds, 'thickening', (ttq, tq))
         profiles += prof
         profiles_description += desc
 
@@ -226,6 +226,73 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
 
         data += [np.stack(profiles)]
         description += [{'attribute': att, 
+                         'profiles': profiles_description,
+                         'image': image_name if image_name else
+                         hash(image.data.tobytes())}]
+    ttq.close()
+
+    return Profiles(data, description)
+
+def self_dual_attribute_profiles(image, attribute, adjacency=4, image_name=None):
+    """
+    Compute the self dual attribute profiles of an image.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image
+    attribute : dict
+        Dictionary of attribute (as key, str) with according thresholds
+        (as values, number).
+    adjacency : int
+        Adjacency used for the tree construction. Default is 4.
+    image_name : str
+        The name of the image (optional). Useful to track filtering
+        process and display. If not set, the name is replaced by the
+        hash of the image.
+
+    Examples
+    --------
+
+    >>> image = np.random.random((100, 100))
+    >>> sap.self_dual_attribute_profiles(image, {'area': [10, 100]})
+    Profiles{'attribute': 'area',
+     'image': 2760575455804575354,
+     'profiles': [{'operation': 'copy'},
+                  {'operation': 'sdap filtering', 'threshold': 10},
+                  {'operation': 'sdap filtering', 'threshold': 100}]}
+    See Also
+    --------
+    sap.trees.available_attributes : List available attributes.
+    attribute_profiles : other profiles.
+
+    """
+    data = []
+    description = []
+
+    tos_tree = trees.TosTree(image, adjacency)
+
+    iter_count = sum(len(x) for x in attribute.values()) + len(attribute)
+    ttq = tqdm(desc='Total', total=iter_count)
+    for att, thresholds in attribute.items():
+        profiles = []; profiles_description = []
+        tq = tqdm(total=len(thresholds) + 1, desc=att)
+
+        # Origin
+        tq.update(); ttq.update()
+        profiles += [image]
+        profiles_description += [{'operation': 'copy'}]
+
+        # Filter
+        prof, desc = _compute_profiles(tos_tree, att, thresholds,
+                'sdap filtering', (ttq, tq))
+        profiles += prof
+        profiles_description += desc
+
+        tq.close()
+
+        data += [np.stack(profiles)]
+        description += [{'attribute': att,
                          'profiles': profiles_description,
                          'image': image_name if image_name else
                          hash(image.data.tobytes())}]
@@ -274,7 +341,7 @@ def _show_profiles(profiles, height=None, fname=None, **kwargs):
 
 def show_all_profiles(profiles, attribute=None, image=None, height=None, fname=None, **kwargs):
     """Display profiles with matplotlib.
-    
+
     Parameters
     ----------
     profiles : sap.profiles.Profiles
@@ -292,7 +359,7 @@ def show_all_profiles(profiles, attribute=None, image=None, height=None, fname=N
     fname : str or PathLike, optional
         If set, the file path to save the figure. The attribute name is
         automatically inserted in the file name.
-    
+
     See Also
     --------
     show_profiles : Display a profiles stack.
@@ -302,7 +369,7 @@ def show_all_profiles(profiles, attribute=None, image=None, height=None, fname=N
     This is a utility function to call recursively `show_profiles`.
     Attribute and image filters are available to filter the profiles to
     display.
-    
+
     """
 
     # Filter profiles according to attribute if attribute is set
@@ -338,7 +405,7 @@ def strip_profiles_copy(profiles):
     return strip_profiles(lambda x: x['operation'] == 'copy', profiles)
 
 def strip_profiles(condition, profiles):
-    """strip_profiles(lambda x: x['operation'] != 'open', profiles)
+    """strip_profiles(lambda x: x['operation'] != 'thinning', profiles)
 
     Remove profiles according to condition. Iteration is done on
     profiles description (see Notes).
@@ -365,13 +432,13 @@ def strip_profiles(condition, profiles):
     >>> aps
     Profiles{'attribute': 'area',
      'image': -8884649894275650052,
-     'profiles': [{'operation': 'open', 'threshold': 1000},
-                  {'operation': 'open', 'threshold': 100},
-                  {'operation': 'open', 'threshold': 10},
+     'profiles': [{'operation': 'thinning', 'threshold': 1000},
+                  {'operation': 'thinning', 'threshold': 100},
+                  {'operation': 'thinning', 'threshold': 10},
                   {'operation': 'copy'},
-                  {'operation': 'close', 'threshold': 10},
-                  {'operation': 'close', 'threshold': 100},
-                  {'operation': 'close', 'threshold': 1000}]}
+                  {'operation': 'thickening', 'threshold': 10},
+                  {'operation': 'thickening', 'threshold': 100},
+                  {'operation': 'thickening', 'threshold': 1000}]}
 
     The condition function is tested on each item of the list
     ``'profiles'``.
@@ -387,23 +454,23 @@ def strip_profiles(condition, profiles):
 
     >>> image = np.random.random((100, 100))
     >>> aps = sap.attribute_profiles(image, {'area': [10, 100, 1000]})
-    >>>
+
     >>> sap.strip_profiles(lambda x: 'threshold' in x and x['threshold'] > 20, aps)
     Profiles{'attribute': 'area',
      'image': 2376333419322655105,
-     'profiles': [{'operation': 'open', 'threshold': 10},
+     'profiles': [{'operation': 'thinning', 'threshold': 10},
                   {'operation': 'copy'},
-                  {'operation': 'close', 'threshold': 10}]}
+                  {'operation': 'thickening', 'threshold': 10}]}
 
     Strip profiles depending on operation:
 
-    >>> sap.strip_profiles(lambda x: x['operation'] == 'open', aps)
+    >>> sap.strip_profiles(lambda x: x['operation'] == 'thinning', aps)
     Profiles{'attribute': 'area',
      'image': 2376333419322655105,
      'profiles': [{'operation': 'copy'},
-                  {'operation': 'close', 'threshold': 10},
-                  {'operation': 'close', 'threshold': 100},
-                  {'operation': 'close', 'threshold': 1000}]}
+                  {'operation': 'thickening', 'threshold': 10},
+                  {'operation': 'thickening', 'threshold': 100},
+                  {'operation': 'thickening', 'threshold': 1000}]}
 
     """
     new_profiles = []
@@ -507,9 +574,9 @@ def concatenate(sequence):
 
     >>> aps_a = sap.attribute_profiles(image, {'area': [10, 100]})
     >>> aps_b = sap.attribute_profiles(image, {'compactness': [.1, .5]})
-    >>>
+
     >>> aps = sap.concatenate((aps_a, aps_b))
-    >>>
+
     >>> len(aps) == len(aps_a) + len(aps_b)
     True
 
@@ -540,7 +607,7 @@ def vectorize(profiles):
 
     >>> image = np.random.random((100, 100))
     >>> aps = sap.attribute_profiles(image, {'area': [10, 100]})
-    >>>
+
     >>> vectors = sap.vectorize(aps)
     >>> vectors.shape
     (5, 100, 100)

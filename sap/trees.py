@@ -25,6 +25,8 @@ less than 100 pixels:
 import higra as hg
 import numpy as np
 import inspect
+import tempfile
+from pathlib import Path
 
 def available_attributes():
     """
@@ -71,15 +73,100 @@ def available_attributes():
             dict_of_attributes[attribute_name] = attribute_param
     return dict_of_attributes
 
+def save(file, tree):
+    """Save a tree to a NumPy archive file.
+
+    Parameters
+    ----------
+    file : str or pathlib.Path
+        File to which the tree is saved.
+    tree: Tree
+        Tree to be saved.
+
+    Examples
+    --------
+
+    >>> mt = sap.MaxTree(np.random.random((100,100)))
+    >>> sap.save('tree.npz', mt)
+
+    """
+    tree_file = Path(tempfile.mkstemp()[1])
+    graph_file = Path(tempfile.mkstemp()[1])
+    # TODO: Remove _alt once higra fixed
+    hg.save_tree(str(tree_file), tree._tree, {'_alt': tree._alt})
+    hg.save_graph_pink(str(graph_file), tree._graph)
+
+    with tree_file.open('rb') as f:
+        tree_bytes = f.read()
+
+    with graph_file.open('rb') as f:
+        graph_bytes = f.read()
+
+    tree_file.unlink()
+    graph_file.unlink()
+
+    data = tree.__dict__.copy()
+    data['_tree'] = tree_bytes
+    data['_graph'] = graph_bytes
+    data['__class__'] = tree.__class__
+
+    np.savez_compressed(file, **data)
+
+def load(file):
+    """Load a tree from a Higra tree file.
+
+    Parameters
+    ----------
+    file : str or pathlib.Path
+        File to which the tree is loaded.
+
+    Examples
+    --------
+
+    >>> mt = sap.MaxTree(np.arange(10000).reshape(100,100))
+    >>> sap.save('tree.npz', mt)
+
+    >>> sap.load('tree.npz')
+    MaxTree{num_nodes: 20000, image.shape: (100, 100), image.dtype: int64}
+
+    """
+    data = np.load(str(file), allow_pickle=True)
+
+    payload = {}
+    for f in data.files:
+        payload[f] = data[f].item() if data[f].size == 1 else data[f]
+
+    tree_file = Path(tempfile.mkstemp()[1])
+    graph_file = Path(tempfile.mkstemp()[1])
+
+    with tree_file.open('wb') as f:
+        f.write(payload['_tree'])
+
+    with graph_file.open('wb') as f:
+        f.write(payload['_graph'])
+
+    tree_cls = payload.pop('__class__')
+
+    tree = tree_cls(None)
+    tree.__dict__.update(payload)
+
+    tree._tree = hg.read_tree(str(tree_file))[0]
+    tree._graph = hg.read_graph_pink(str(graph_file))[0]
+
+    tree_file.unlink()
+    graph_file.unlink()
+
+    return tree
+
+
 class Tree:
     """
     Abstract class for tree representations of images.
 
     Notes
-    ----- 
+    -----
     You should not instantiate class `Tree` directly, use `MaxTree` or
     `MinTree` instead.
-
 
     """
     def __init__(self, image, adjacency):
@@ -88,6 +175,18 @@ class Tree:
 
         self._adjacency = adjacency
         self._image = image
+
+        if image is not None:
+            self._graph = self._get_adjacency_graph()
+            self._construct()
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return self.__class__.__name__ + \
+           '{{num_nodes: {}, image.shape: {}, image.dtype: {}}}'.format(
+           self.num_nodes(), self._image.shape, self._image.dtype)
 
     def _get_adjacency_graph(self):
         if self._adjacency == 4:
@@ -189,7 +288,7 @@ class Tree:
         deleted_nodes : ndarray or boolean
             Boolean array of node to delete with `len(deleted_nodes) ==
             tree.num_nodes()`.
-        
+
         Returns
         -------
         filtered_image : ndarray
@@ -200,7 +299,7 @@ class Tree:
             deleted_nodes = np.array((deleted_nodes,) * self.num_nodes())
 
         return hg.reconstruct_leaf_data(self._tree, self._alt, deleted_nodes)
-    
+
     def num_nodes(self):
         """
         Return the node count of the tree.
@@ -234,8 +333,9 @@ class MaxTree(Tree):
     """
     def __init__(self, image, adjacency=4):
         super().__init__(image, adjacency)
-        graph = self._get_adjacency_graph()
-        self._tree, self._alt = hg.component_tree_max_tree(graph, image)
+
+    def _construct(self):
+        self._tree, self._alt = hg.component_tree_max_tree(self._graph, self._image)
 
 
 class MinTree(Tree):
@@ -259,5 +359,36 @@ class MinTree(Tree):
     """
     def __init__(self, image, adjacency=4):
         super().__init__(image, adjacency)
-        graph = self._get_adjacency_graph()
-        self._tree, self._alt = hg.component_tree_min_tree(graph, image)
+
+    def _construct(self):
+        self._tree, self._alt = hg.component_tree_min_tree(self._graph, self._image)
+
+class TosTree(Tree):
+    """
+    Tree of shapes, the local maxima values of the image are in leafs.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image to be represented by the tree structure.
+    adjacency : int
+        The pixel connectivity to use during the tree creation. It
+        determines the number of pixels to be taken into account in the
+        neighborhood of each pixel. The allowed adjacency are 4 or 8.
+        Default is 4.
+
+    Notes
+    -----
+    Inherits all the methods of `Tree` class.
+
+    Todo
+    ----
+    - take into account adjacency
+
+    """
+    def __init__(self, image, adjacency=4):
+        super().__init__(image, adjacency)
+
+    def _construct(self):
+        self._tree, self._alt = hg.component_tree_tree_of_shapes_image2d(self._image)
+

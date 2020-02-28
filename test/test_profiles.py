@@ -25,6 +25,10 @@ def profiles_b(image):
                                           'height': [.1, .5]},
                                         image_name='image b')
 
+def test_profiles(image):
+    ps = sap.create_profiles(image, {'area': [10, 100, 1000]}, 4, None,
+            (sap.MinTree, sap.MaxTree), ('thinning', 'thickening'))
+
 @pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles',
         [(4, {'area': [10, 100]}, 1, (5,)),
          (8, {'area': [10, 100]}, 1, (5,)),

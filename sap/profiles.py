@@ -158,6 +158,81 @@ class Profiles:
         """
         return strip_profiles_copy(self)
 
+def create_profiles(image, attribute, adjacency, image_name,
+        tree, operation, out_feature='altitude'):
+    """
+    Compute the profiles of an images. Generic function.
+
+    Parameters
+    ----------
+
+    attribute: dict
+    tree: sap.trees.Tree, serie of sap.trees.Tree
+        Tree or pair of tree for non dual filtering (e.g. min-tree and max-tree
+        for attribute profiles).
+
+    attribute
+    create_profiles(..., (min_tree, max_tree), ('thinning', 'thickening'))
+    create_profiles(..., tos, 'sdap filtering')
+    create_profiles(..., tos, 'sdfp filtering', attribute)
+    create_profiles(..., tos, 'sdfp filtering', attribute).diff()
+    create_profiles(..., tos, 'sdfp filtering', attribute).lf(size)
+
+    """
+    data = []
+    description = []
+
+    if isinstance(tree, type):
+        # Dual tree
+        ndual = False
+        thinning_tree = None
+        thickening_tree = tree(image, adjacency)
+        thickening_operation = operation
+    elif (isinstance(tree, tuple) or isinstance(tree, list)) and len(tree) > 1:
+        # Non dual trees
+        ndual = True
+        thinning_tree = tree[0](image, adjacency)
+        thickening_tree = tree[1](image, adjacency)
+        thinning_operation = operation[0]
+        thickening_operation = operation[1]
+    else:
+        raise IOError('TODO')
+
+    iter_count = sum(len(x) for x in attribute.values()) * (1 + ndual) + len(attribute)
+    ttq = tqdm(desc='Total', total=iter_count)
+    for att, thresholds in attribute.items():
+        profiles = []; profiles_description = []
+        tq = tqdm(total=len(thresholds) * (1 + ndual) + 1, desc=att)
+
+        if ndual:
+            # thinning
+            prof, desc = _compute_profiles(thinning_tree, att,
+                    thresholds[::-1], thinning_operation, (ttq, tq))
+            profiles += prof
+            profiles_description += desc
+
+        # Origin
+        tq.update(); ttq.update()
+        profiles += [image]
+        profiles_description += [{'operation': 'copy'}]
+
+        # thickening
+        prof, desc = _compute_profiles(thickening_tree, att, thresholds,
+                thickening_operation, (ttq, tq))
+        profiles += prof
+        profiles_description += desc
+
+        tq.close()
+
+        data += [np.stack(profiles)]
+        description += [{'attribute': att, 
+                         'profiles': profiles_description,
+                         'image': image_name if image_name else
+                         hash(image.data.tobytes())}]
+    ttq.close()
+
+    return Profiles(data, description)
+
 
 def attribute_profiles(image, attribute, adjacency=4, image_name=None):
     """
@@ -195,43 +270,8 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
     sap.trees.available_attributes : List available attributes.
 
     """
-    data = []
-    description = []
-
-    max_tree = trees.MaxTree(image, adjacency)
-    min_tree = trees.MinTree(image, adjacency)
-
-    iter_count = sum(len(x) for x in attribute.values()) * 2 + len(attribute)
-    ttq = tqdm(desc='Total', total=iter_count)
-    for att, thresholds in attribute.items():
-        profiles = []; profiles_description = []
-        tq = tqdm(total=len(thresholds) * 2 + 1, desc=att)
-
-        # thinning
-        prof, desc = _compute_profiles(min_tree, att, thresholds[::-1], 'thinning', (ttq, tq))
-        profiles += prof
-        profiles_description += desc
-
-        # Origin
-        tq.update(); ttq.update()
-        profiles += [image]
-        profiles_description += [{'operation': 'copy'}]
-
-        # thickening
-        prof, desc = _compute_profiles(max_tree, att, thresholds, 'thickening', (ttq, tq))
-        profiles += prof
-        profiles_description += desc
-
-        tq.close()
-
-        data += [np.stack(profiles)]
-        description += [{'attribute': att, 
-                         'profiles': profiles_description,
-                         'image': image_name if image_name else
-                         hash(image.data.tobytes())}]
-    ttq.close()
-
-    return Profiles(data, description)
+    return create_profiles(image, attribute, adjacency, image_name,
+            (trees.MinTree, trees.MaxTree), ('thinning', 'thickening'))
 
 def self_dual_attribute_profiles(image, attribute, adjacency=4, image_name=None):
     """
@@ -267,38 +307,8 @@ def self_dual_attribute_profiles(image, attribute, adjacency=4, image_name=None)
     attribute_profiles : other profiles.
 
     """
-    data = []
-    description = []
-
-    tos_tree = trees.TosTree(image, adjacency)
-
-    iter_count = sum(len(x) for x in attribute.values()) + len(attribute)
-    ttq = tqdm(desc='Total', total=iter_count)
-    for att, thresholds in attribute.items():
-        profiles = []; profiles_description = []
-        tq = tqdm(total=len(thresholds) + 1, desc=att)
-
-        # Origin
-        tq.update(); ttq.update()
-        profiles += [image]
-        profiles_description += [{'operation': 'copy'}]
-
-        # Filter
-        prof, desc = _compute_profiles(tos_tree, att, thresholds,
-                'sdap filtering', (ttq, tq))
-        profiles += prof
-        profiles_description += desc
-
-        tq.close()
-
-        data += [np.stack(profiles)]
-        description += [{'attribute': att,
-                         'profiles': profiles_description,
-                         'image': image_name if image_name else
-                         hash(image.data.tobytes())}]
-    ttq.close()
-
-    return Profiles(data, description)
+    return create_profiles(image, attribute, adjacency, image_name,
+                trees.TosTree, 'sdap filtering')
 
 def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None):
     """

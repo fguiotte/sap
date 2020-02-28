@@ -184,9 +184,12 @@ class Tree:
         return self.__repr__()
 
     def __repr__(self):
-        return self.__class__.__name__ + \
-           '{{num_nodes: {}, image.shape: {}, image.dtype: {}}}'.format(
-           self.num_nodes(), self._image.shape, self._image.dtype)
+        if hasattr(self, '_tree'):
+            rep = '{{num_nodes: {}, image.shape: {}, image.dtype: {}}}'.format(
+                   self.num_nodes(), self._image.shape, self._image.dtype)
+        else:
+            rep = '{}'
+        return self.__class__.__name__ + rep
 
     def _get_adjacency_graph(self):
         if self._adjacency == 4:

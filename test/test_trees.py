@@ -90,11 +90,11 @@ def test_str(max_tree):
     '__str__ of Tree did not returned expected output'
 
 
-def test_io(max_tree, tmpdir):
-    save_file = tmpdir + '/tree.npz'
-    sap.save(save_file, max_tree)
-
-    mt = sap.load(save_file)
-
-    assert str(mt) == str(max_tree), 'Loaded Tree is different than saved Tree'
+#def test_io(max_tree, tmpdir):
+#    save_file = tmpdir + '/tree.npz'
+#    sap.save(save_file, max_tree)
+#
+#    mt = sap.load(save_file)
+#
+#    assert str(mt) == str(max_tree), 'Loaded Tree is different than saved Tree'
 

@@ -42,7 +42,19 @@ def test_create_profiles_assertions(image):
     # Not operation names
     with pytest.raises(TypeError):
         sap.create_profiles(image, {'area': [10, 100, 1000]},
-                sap.MinTree)
+                (sap.MinTree, sap.MaxTree))
+
+def test_self_dual_feature_profiles(image):
+    sdfp = sap.self_dual_feature_profiles(image, {'area': [10, 100, 1000]})
+
+    assert len(sdfp) == 1
+    assert sdfp.data.shape[0] == 4
+
+def test_feature_profiles(image):
+    fp = sap.feature_profiles(image, {'area': [10, 100, 1000]})
+
+    assert len(fp) == 1
+    assert fp.data.shape[0] == 7
 
 @pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles',
         [(4, {'area': [10, 100]}, 1, (5,)),

@@ -25,9 +25,24 @@ def profiles_b(image):
                                           'height': [.1, .5]},
                                         image_name='image b')
 
-def test_profiles(image):
-    ps = sap.create_profiles(image, {'area': [10, 100, 1000]}, 4, None,
+def test_create_profiles_assertions(image):
+    ps = sap.create_profiles(image, {'area': [10, 100, 1000]},
             (sap.MinTree, sap.MaxTree), ('thinning', 'thickening'))
+
+def test_create_profiles_assertions(image):
+    # Not tree types
+    with pytest.raises(TypeError):
+        sap.create_profiles(image, {'area': [10, 100, 1000]},
+                (np.ndarray, np.ndarray), 'not a tree')
+
+    with pytest.raises(TypeError):
+        sap.create_profiles(image, {'area': [10, 100, 1000]},
+                np.ndarray, 'not a tree')
+
+    # Not operation names
+    with pytest.raises(TypeError):
+        sap.create_profiles(image, {'area': [10, 100, 1000]},
+                sap.MinTree)
 
 @pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles',
         [(4, {'area': [10, 100]}, 1, (5,)),

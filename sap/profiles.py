@@ -158,8 +158,8 @@ class Profiles:
         """
         return strip_profiles_copy(self)
 
-def create_profiles(image, attribute, adjacency, image_name,
-        tree, operation, out_feature='altitude'):
+def create_profiles(image, attribute, tree_type, operation,
+        adjacency=4, image_name=None, out_feature='altitude'):
     """
     Compute the profiles of an images. Generic function.
 
@@ -167,7 +167,7 @@ def create_profiles(image, attribute, adjacency, image_name,
     ----------
 
     attribute: dict
-    tree: sap.trees.Tree, serie of sap.trees.Tree
+    tree_type: sap.trees.Tree, serie of sap.trees.Tree
         Tree or pair of tree for non dual filtering (e.g. min-tree and max-tree
         for attribute profiles).
 
@@ -182,21 +182,32 @@ def create_profiles(image, attribute, adjacency, image_name,
     data = []
     description = []
 
-    if isinstance(tree, type):
-        # Dual tree
-        ndual = False
-        thinning_tree = None
-        thickening_tree = tree(image, adjacency)
-        thickening_operation = operation
-    elif (isinstance(tree, tuple) or isinstance(tree, list)) and len(tree) > 1:
-        # Non dual trees
-        ndual = True
-        thinning_tree = tree[0](image, adjacency)
-        thickening_tree = tree[1](image, adjacency)
-        thinning_operation = operation[0]
-        thickening_operation = operation[1]
-    else:
-        raise IOError('TODO')
+    # Create Trees
+    try:
+        if isinstance(tree_type, type):
+            # Dual tree
+            ndual = False
+            thinning_tree = None
+            thickening_tree = tree_type(image, adjacency)
+        else:
+            # Non dual trees
+            ndual = True
+            thinning_tree = tree_type[0](image, adjacency)
+            thickening_tree = tree_type[1](image, adjacency)
+    except:
+        raise TypeError('Parameter tree_type must be a tuple or a single type '\
+        'of Tree, not {}'.format(tree_type))
+
+    # Get operation names
+    try:
+        if not ndual:
+            thickening_operation = operation
+        else:
+            thinning_operation = operation[0]
+            thickening_operation = operation[1]
+    except:
+        raise TypeError('Parameter oparation must match tree_type count, '\
+                'a single string or an iterable, not {}'.format(operation))
 
     iter_count = sum(len(x) for x in attribute.values()) * (1 + ndual) + len(attribute)
     ttq = tqdm(desc='Total', total=iter_count)
@@ -270,9 +281,8 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
     sap.trees.available_attributes : List available attributes.
 
     """
-    return create_profiles(image, attribute, adjacency, image_name,
-            (trees.MinTree, trees.MaxTree), ('thinning', 'thickening'))
-
+    return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
+            ('thinning', 'thickening'), adjacency, image_name)
 def self_dual_attribute_profiles(image, attribute, adjacency=4, image_name=None):
     """
     Compute the self dual attribute profiles of an image.
@@ -307,8 +317,8 @@ def self_dual_attribute_profiles(image, attribute, adjacency=4, image_name=None)
     attribute_profiles : other profiles.
 
     """
-    return create_profiles(image, attribute, adjacency, image_name,
-                trees.TosTree, 'sdap filtering')
+    return create_profiles(image, attribute, trees.TosTree, 'sdap filtering',
+                           adjacency, image_name)
 
 def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None):
     """

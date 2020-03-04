@@ -47,6 +47,13 @@ def test_create_profiles_assertions(image):
         sap.create_profiles(image, {'area': [10, 100, 1000]},
                 (sap.MinTree, sap.MaxTree))
 
+    # Wrong out_feature
+    with pytest.raises(ValueError):
+        sap.create_profiles(image, {'area': [10, 100, 1000]},
+            (sap.MinTree, sap.MaxTree), ('thinning', 'thickening'),
+            out_feature='copy')
+
+
 def test_self_dual_feature_profiles(image):
     sdfp = sap.self_dual_feature_profiles(image, {'area': [10, 100, 1000]})
 

@@ -237,6 +237,11 @@ def create_profiles(image, attribute, tree_type, operation=None,
         raise TypeError('Parameter oparation must match tree_type count, '\
                 'a single string or an iterable, not {}'.format(operation))
 
+    # Check out_feature
+    if not out_feature in ('same', 'altitude'):
+        raise ValueError('Unknow value "{}" for parameter '\
+                'out_feature'.format(out_feature))
+
     iter_count = sum(len(x) for x in attribute.values()) * (1 + ndual) + len(attribute)
     ttq = tqdm(desc='Total', total=iter_count)
     for att, thresholds in attribute.items():
@@ -254,8 +259,8 @@ def create_profiles(image, attribute, tree_type, operation=None,
 
         # Origin
         tq.update(); ttq.update()
-        profiles += [image]
-        profiles_description += [{'operation': 'copy'}]
+        profiles += [thickening_tree.reconstruct(feature=of)]
+        profiles_description += [{'operation': 'copy feature {}'.format(of)}]
 
         # thickening
         prof, desc = _compute_profiles(thickening_tree, att, thresholds,

@@ -25,9 +25,12 @@ def profiles_b(image):
                                           'height': [.1, .5]},
                                         image_name='image b')
 
-def test_create_profiles_assertions(image):
+def test_create_profiles(image):
     ps = sap.create_profiles(image, {'area': [10, 100, 1000]},
             (sap.MinTree, sap.MaxTree), ('thinning', 'thickening'))
+
+    assert len(ps) == 1
+    assert ps.data.shape[0] == 7
 
 def test_create_profiles_assertions(image):
     # Not tree types

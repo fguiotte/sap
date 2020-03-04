@@ -165,25 +165,46 @@ def create_profiles(image, attribute, tree_type, operation=None,
 
     Parameters
     ----------
-
-    attribute: dict
-    tree_type: sap.trees.Tree, serie of sap.trees.Tree
-        Tree or pair of tree for non dual filtering (e.g. min-tree and max-tree
-        for attribute profiles).
-    out_feature: str or list of str
-        'altitude', 'same' for feature same as attribute (cf.
-        :func:`feature_profiles` and :func:`self_dual_feature_profiles`).
-
-    attribute
-    create_profiles(..., (min_tree, max_tree), ('thinning', 'thickening'))
-    create_profiles(..., tos, 'sdap filtering')
-    create_profiles(..., tos, 'sdfp filtering', attribute)
-    create_profiles(..., tos, 'sdfp filtering', attribute).diff()
-    create_profiles(..., tos, 'sdfp filtering', attribute).lf(size)
+    image : ndarray
+        The image to be profiled.
+    attribute : dict
+        Dictionary of attribute (as key, str) with according thresholds
+        (as values, iterable of thresholds).
+    tree_type : sap.trees.Tree, serie of sap.trees.Tree
+        Tree or pair of tree for non dual filtering (e.g. min-tree and
+        max-tree for attribute profiles).
+    operation : str or iterable of str
+        Name or names of the filtering processed by tree_type. Must
+        match tree_type count.
+    adjacency : int, optional
+        Adjacency used for the tree construction. Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display. If not set, the name is replaced by the hash of the
+        image.
+    out_feature: str, optional
+        Out feature of the profiles. Can be 'altitude' (default) or
+        'same' so that out feature of the profiles match the filtering
+        attribute (cf.  :func:`feature_profiles` and
+        :func:`self_dual_feature_profiles`).
 
     Todo
     ----
     out_feature takes a list of features.
+
+    Example
+    -------
+    >>> image = np.arange(5*5).reshape(5, 5)
+
+    >>> sap.create_profiles(image, {'area': [5, 10]},
+    ...    (sap.MinTree, sap.MaxTree), ('thinning', 'thickening'))
+    Profiles{'attribute': 'area',
+     'image': -7204331716152014795,
+     'profiles': [{'operation': 'thinning', 'threshold': 10},
+                  {'operation': 'thinning', 'threshold': 5},
+                  {'operation': 'copy'},
+                  {'operation': 'thickening', 'threshold': 5},
+                  {'operation': 'thickening', 'threshold': 10}]}
 
     """
     data = []

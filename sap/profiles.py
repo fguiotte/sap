@@ -297,7 +297,8 @@ def _compute_profiles(tree, attribute, thresholds, operation, tqs,
 
     return data, desc
 
-def attribute_profiles(image, attribute, adjacency=4, image_name=None):
+def attribute_profiles(image, attribute, adjacency=4, image_name=None,
+        filtering_rule='direct'):
     """
     Compute the attribute profiles of an image.
 
@@ -314,6 +315,10 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
         The name of the image (optional). Useful to track filtering
         process and display. If not set, the name is replaced by the
         hash of the image.
+    filtering_rule: str, optional
+        The filtering rule to use. It can be 'direct', 'min', 'max' or
+        'subtractive'. Default is 'direct'.
+
 
     Examples
     --------
@@ -334,9 +339,11 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None):
 
     """
     return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
-            ('thinning', 'thickening'), adjacency, image_name)
+            ('thinning', 'thickening'), adjacency, image_name, 'altitude',
+            filtering_rule)
 
-def self_dual_attribute_profiles(image, attribute, adjacency=4, image_name=None):
+def self_dual_attribute_profiles(image, attribute, adjacency=4,
+        image_name=None, filtering_rule='direct'):
     """
     Compute the self dual attribute profiles of an image.
 
@@ -353,6 +360,9 @@ def self_dual_attribute_profiles(image, attribute, adjacency=4, image_name=None)
         The name of the image (optional). Useful to track filtering
         process and display. If not set, the name is replaced by the
         hash of the image.
+    filtering_rule: str, optional
+        The filtering rule to use. It can be 'direct', 'min', 'max' or
+        'subtractive'. Default is 'direct'.
 
     Examples
     --------
@@ -371,9 +381,10 @@ def self_dual_attribute_profiles(image, attribute, adjacency=4, image_name=None)
 
     """
     return create_profiles(image, attribute, trees.TosTree, 'sdap filtering',
-                           adjacency, image_name)
+                           adjacency, image_name, 'altitude', filtering_rule)
 
-def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None):
+def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
+        filtering_rule='direct'):
     """
     Compute the self dual features profiles of an image.
 
@@ -390,6 +401,9 @@ def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None):
         The name of the image (optional). Useful to track filtering
         process and display. If not set, the name is replaced by the
         hash of the image.
+    filtering_rule: str, optional
+        The filtering rule to use. It can be 'direct', 'min', 'max' or
+        'subtractive'. Default is 'direct'.
 
     Examples
     --------
@@ -408,9 +422,10 @@ def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None):
 
     """
     return create_profiles(image, attribute, trees.TosTree, 'sdfp filtering',
-                           adjacency, image_name, 'same')
+                           adjacency, image_name, 'same', filtering_rule)
 
-def feature_profiles(image, attribute, adjacency=4, image_name=None):
+def feature_profiles(image, attribute, adjacency=4, image_name=None,
+        filtering_rule='direct'):
     """
     Compute the feature profiles of an image.
 
@@ -427,6 +442,9 @@ def feature_profiles(image, attribute, adjacency=4, image_name=None):
         The name of the image (optional). Useful to track filtering
         process and display. If not set, the name is replaced by the
         hash of the image.
+    filtering_rule: str, optional
+        The filtering rule to use. It can be 'direct', 'min', 'max' or
+        'subtractive'. Default is 'direct'.
 
     Examples
     --------
@@ -450,7 +468,7 @@ def feature_profiles(image, attribute, adjacency=4, image_name=None):
     """
     return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
             ('feature profile thinning', 'feature profile thickening'),
-            adjacency, image_name, 'same')
+            adjacency, image_name, 'same', filtering_rule)
 
 def _show_profiles(profiles, height=None, fname=None, **kwargs):
     assert len(profiles) == 1, 'Show profile only for one attribute at a time.'

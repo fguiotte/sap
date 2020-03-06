@@ -25,6 +25,47 @@ def profiles_b(image):
                                           'height': [.1, .5]},
                                         image_name='image b')
 
+def test_create_profiles(image):
+    ps = sap.create_profiles(image, {'area': [10, 100, 1000]},
+            (sap.MinTree, sap.MaxTree), ('thinning', 'thickening'))
+
+    assert len(ps) == 1
+    assert ps.data.shape[0] == 7
+
+def test_create_profiles_assertions(image):
+    # Not tree types
+    with pytest.raises(TypeError):
+        sap.create_profiles(image, {'area': [10, 100, 1000]},
+                (np.ndarray, np.ndarray), 'not a tree')
+
+    with pytest.raises(TypeError):
+        sap.create_profiles(image, {'area': [10, 100, 1000]},
+                np.ndarray, 'not a tree')
+
+    # Not operation names
+    with pytest.raises(TypeError):
+        sap.create_profiles(image, {'area': [10, 100, 1000]},
+                (sap.MinTree, sap.MaxTree))
+
+    # Wrong out_feature
+    with pytest.raises(ValueError):
+        sap.create_profiles(image, {'area': [10, 100, 1000]},
+            (sap.MinTree, sap.MaxTree), ('thinning', 'thickening'),
+            out_feature='copy')
+
+
+def test_self_dual_feature_profiles(image):
+    sdfp = sap.self_dual_feature_profiles(image, {'area': [10, 100, 1000]})
+
+    assert len(sdfp) == 1
+    assert sdfp.data.shape[0] == 4
+
+def test_feature_profiles(image):
+    fp = sap.feature_profiles(image, {'area': [10, 100, 1000]})
+
+    assert len(fp) == 1
+    assert fp.data.shape[0] == 7
+
 @pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles',
         [(4, {'area': [10, 100]}, 1, (5,)),
          (8, {'area': [10, 100]}, 1, (5,)),
@@ -55,6 +96,21 @@ def test_self_dual_attribute_profiles(image, attribute, adjacency,
     'Expected stacks missmatch'
 
     for ap, ep in zip(sdaps, exptd_profiles):
+        assert ap.data.shape[0] == ep, 'Expected profiles count missmatch'
+
+@pytest.mark.parametrize('adjacency, attribute, exptd_stacks, exptd_profiles',
+        [(4, {'area': [10, 100]}, 1, (3,)),
+         (8, {'area': [10, 100]}, 1, (3,)),
+         (4, {'compactness': [.1, .5], 'volume': [100, 5000, 1000]}, 2, (3, 4))
+        ])
+def test_self_dueal_feature_profiles(image, attribute, adjacency,
+        exptd_stacks, exptd_profiles):
+    sdfps = sap.self_dual_feature_profiles(image, attribute, adjacency)
+
+    assert len(sdfps) == exptd_stacks, \
+    'Expected stacks missmatch'
+
+    for ap, ep in zip(sdfps, exptd_profiles):
         assert ap.data.shape[0] == ep, 'Expected profiles count missmatch'
 
 def test_attribute_profiles_assert(image):

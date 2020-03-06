@@ -85,6 +85,16 @@ def test_reconstruct(max_tree, image):
     filtered_image = max_tree.reconstruct(False)
     assert (filtered_image == image).all(), 'Boolean input not working'
 
+@pytest.mark.parametrize('feature', ['altitude', 'area', 'compactness'])
+def test_reconstruct_feature(max_tree, image, feature):
+    filtered_image = max_tree.reconstruct(feature=feature)
+    assert filtered_image is not None, 'Reconstruct returned nothing'
+
+@pytest.mark.parametrize('filtering', ['direct', 'min', 'max', 'subtractive'])
+def test_reconstruct_feature(max_tree, image, filtering):
+    filtered_image = max_tree.reconstruct(filtering=filtering)
+    assert filtered_image is not None, 'Reconstruct returned nothing'
+
 def test_str(max_tree):
     assert str(max_tree) == 'MaxTree{num_nodes: 20000, image.shape: (100, 100), image.dtype: int64}', \
     '__str__ of Tree did not returned expected output'

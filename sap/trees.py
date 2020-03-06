@@ -184,9 +184,12 @@ class Tree:
         return self.__repr__()
 
     def __repr__(self):
-        return self.__class__.__name__ + \
-           '{{num_nodes: {}, image.shape: {}, image.dtype: {}}}'.format(
-           self.num_nodes(), self._image.shape, self._image.dtype)
+        if hasattr(self, '_tree'):
+            rep = '{{num_nodes: {}, image.shape: {}, image.dtype: {}}}'.format(
+                   self.num_nodes(), self._image.shape, self._image.dtype)
+        else:
+            rep = '{}'
+        return self.__class__.__name__ + rep
 
     def _get_adjacency_graph(self):
         if self._adjacency == 4:
@@ -279,26 +282,90 @@ class Tree:
 
         return compute(self._tree, **kwargs)
 
-    def reconstruct(self, deleted_nodes=None):
+    def reconstruct(self, deleted_nodes=None, feature='altitude',
+                    filtering='direct'):
         """
         Return the reconstructed image according to deleted nodes.
 
         Parameters
         ----------
-        deleted_nodes : ndarray or boolean
-            Boolean array of node to delete with `len(deleted_nodes) ==
-            tree.num_nodes()`.
+        deleted_nodes : ndarray or boolean, optional
+            Boolean array of nodes to delete. The length of the array should be
+            of same of node count.
+        feature : str, optional
+            The feature to be reconstructed. Can be any attribute of the
+            tree (see :func:`available_attributes`). The default is
+            `'altitude'`, the grey level of the node.
+        filtering : str, optional
+            The filtering rule to use. It can be 'direct', 'min', 'max' or
+            'subtractive'.
 
         Returns
         -------
         filtered_image : ndarray
             The reconstructed image.
 
+        Examples
+        --------
+        >>> image = np.arange(5 * 5).reshape(5, 5)
+        >>> mt = sap.MaxTree(image)
+
+        >>> mt.reconstruct()
+        array([[ 0,  1,  2,  3,  4],
+               [ 5,  6,  7,  8,  9],
+               [10, 11, 12, 13, 14],
+               [15, 16, 17, 18, 19],
+               [20, 21, 22, 23, 24]])
+        
+        >>> area = mt.get_attribute('area')
+
+        >>> mt.reconstruct(area > 10)
+        array([[ 0,  0,  0,  0,  0],
+               [ 0,  0,  0,  0,  0],
+               [ 0,  0,  0,  0,  0],
+               [15, 16, 17, 18, 19],
+               [20, 21, 22, 23, 24]])
+
+
         """
         if isinstance(deleted_nodes, bool):
             deleted_nodes = np.array((deleted_nodes,) * self.num_nodes())
+        elif deleted_nodes is None:
+            deleted_nodes = np.zeros(self.num_nodes(), dtype=np.bool)
 
-        return hg.reconstruct_leaf_data(self._tree, self._alt, deleted_nodes)
+        feature_value = self._alt if feature == 'altitude' else \
+            self.get_attribute(feature)
+
+        rules = {'direct': self._filtering_direct,
+                 'min': self._filtering_min,
+                 'max': self._filtering_max,
+                 'subtractive': self._filtering_subtractive}
+
+        feature_value, deleted_nodes = rules[filtering](feature_value, deleted_nodes)
+
+        return hg.reconstruct_leaf_data(self._tree, feature_value, deleted_nodes)
+
+    def _filtering_direct(self, feature_value, direct):
+        deleted_nodes = direct
+        return feature_value, deleted_nodes
+
+    def _filtering_min(self, feature_value, direct):
+        deleted_nodes = hg.propagate_sequential(self._tree, direct, ~direct)
+        return feature_value, deleted_nodes
+
+    def _filtering_max(self, feature_value, direct):
+        deleted_nodes = hg.accumulate_and_min_sequential(self._tree, direct,
+                    np.ones(self._tree.num_leaves()), hg.Accumulators.min)
+        return feature_value, deleted_nodes
+
+    def _filtering_subtractive(self, feature_value, direct):
+        deleted_nodes = direct
+        delta = feature_value - feature_value[self._tree.parents()]
+        delta[direct] = 0
+        delta[self._tree.root()] = feature_value[self._tree.root()]
+        feature_value = hg.propagate_sequential_and_accumulate(self._tree, delta, 
+                                                             hg.Accumulators.sum)
+        return feature_value, deleted_nodes
 
     def num_nodes(self):
         """

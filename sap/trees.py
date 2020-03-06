@@ -298,7 +298,7 @@ class Tree:
             `'altitude'`, the grey level of the node.
         filtering : str, optional
             The filtering rule to use. It can be 'direct', 'min', 'max' or
-            'subtractive'.
+            'subtractive'. Default is 'direct'.
 
         Returns
         -------

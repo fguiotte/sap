@@ -159,7 +159,8 @@ class Profiles:
         return strip_profiles_copy(self)
 
 def create_profiles(image, attribute, tree_type, operation=None,
-        adjacency=4, image_name=None, out_feature='altitude'):
+        adjacency=4, image_name=None, out_feature='altitude',
+        filtering_rule='direct'):
     """
     Compute the profiles of an images. Generic function.
 
@@ -187,6 +188,9 @@ def create_profiles(image, attribute, tree_type, operation=None,
         'same' so that out feature of the profiles match the filtering
         attribute (cf.  :func:`feature_profiles` and
         :func:`self_dual_feature_profiles`).
+    filtering_rule: str, optional
+        The filtering rule to use. It can be 'direct', 'min', 'max' or
+        'subtractive'. Default is 'direct'.
 
     Todo
     ----
@@ -253,7 +257,8 @@ def create_profiles(image, attribute, tree_type, operation=None,
         if ndual:
             # thinning
             prof, desc = _compute_profiles(thinning_tree, att,
-                    thresholds[::-1], thinning_operation, (ttq, tq), of)
+                    thresholds[::-1], thinning_operation, (ttq, tq), of,
+                    filtering_rule)
             profiles += prof
             profiles_description += desc
 
@@ -264,7 +269,7 @@ def create_profiles(image, attribute, tree_type, operation=None,
 
         # thickening
         prof, desc = _compute_profiles(thickening_tree, att, thresholds,
-                thickening_operation, (ttq, tq), of)
+                thickening_operation, (ttq, tq), of, filtering_rule)
         profiles += prof
         profiles_description += desc
 
@@ -279,7 +284,8 @@ def create_profiles(image, attribute, tree_type, operation=None,
 
     return Profiles(data, description)
 
-def _compute_profiles(tree, attribute, thresholds, operation, tqs, feature='altitude'):
+def _compute_profiles(tree, attribute, thresholds, operation, tqs, 
+        feature='altitude', rule='direct'):
     data = []
     desc = []
 
@@ -287,7 +293,7 @@ def _compute_profiles(tree, attribute, thresholds, operation, tqs, feature='alti
         for tq in tqs: tq.update()
         desc += [{'operation': operation, 'threshold': t}]
         deleted_nodes = tree.get_attribute(attribute) < t
-        data += [tree.reconstruct(deleted_nodes, feature)]
+        data += [tree.reconstruct(deleted_nodes, feature, rule)]
 
     return data, desc
 

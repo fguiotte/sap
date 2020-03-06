@@ -24,6 +24,14 @@ def min_tree(image):
 def tos_tree(image):
     return sap.TosTree(image)
 
+def test_Tree_constructor():
+    with pytest.raises(TypeError):
+        sap.Tree(None, None)
+
+def test_Tree_adjacency(image):
+    with pytest.raises(NotImplementedError):
+        sap.MaxTree(image, 42)
+
 @pytest.mark.parametrize('adjacency', [4, 8])
 def test_MaxTree_constructor(image, adjacency):
     t = sap.MaxTree(image, adjacency)
@@ -99,6 +107,8 @@ def test_str(max_tree):
     assert str(max_tree) == 'MaxTree{num_nodes: 20000, image.shape: (100, 100), image.dtype: int64}', \
     '__str__ of Tree did not returned expected output'
 
+    mt = sap.MaxTree(None, None)
+    assert str(mt) == 'MaxTree{}'
 
 #def test_io(max_tree, tmpdir):
 #    save_file = tmpdir + '/tree.npz'

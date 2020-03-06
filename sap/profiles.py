@@ -77,12 +77,12 @@ class Profiles:
     def __getitem__(self, key):
         if self.len == 1 and key == 0:
             return self
-         
+
         return Profiles([self.data[key]], [self.description[key]])
-    
+
     def __add__(self, other):
         return concatenate((self, other))
-    
+
     def diff(self):
         """Compute the differential of profiles.
 
@@ -90,7 +90,7 @@ class Profiles:
         -------
         differential : Profiles
             The processed differential profiles.
-        
+
         """
         return differential(self)
 
@@ -135,7 +135,7 @@ class Profiles:
         strip_profiles : equivalent function
         """
         return strip_profiles(condition, self)
-    
+
     def strip_copy(self):
         """Remove all the copied images in profiles.
 
@@ -271,7 +271,7 @@ def create_profiles(image, attribute, tree_type, operation=None,
         tq.close()
 
         data += [np.stack(profiles)]
-        description += [{'attribute': att, 
+        description += [{'attribute': att,
                          'profiles': profiles_description,
                          'image': image_name if image_name else
                          hash(image.data.tobytes())}]
@@ -611,16 +611,16 @@ def strip_profiles(condition, profiles):
     for ap in profiles:
         # Process the profile filter
         prof_filter = [not condition(x) for x in ap.description['profiles']]
-        
+
         # Create filtered description
         new_desc = ap.description.copy()
         new_desc['profiles'] = [p for p, f in zip(ap.description['profiles'], prof_filter) if f]
-        
+
         # Filter the new data
         new_data = ap.data[prof_filter]
-        
+
         new_profiles += [Profiles([new_data], [new_desc])]
-        
+
     return concatenate(new_profiles)
 
 def differential(profiles):
@@ -630,13 +630,13 @@ def differential(profiles):
     ----------
     profiles : Profiles
         Attribute profiles or other profiles to process the differential
-        on. 
-    
+        on.
+
     Returns
     -------
     differential : Profiles
         The processed differential profiles.
-    
+
     """
     new_data = []
     new_desc = []
@@ -645,14 +645,14 @@ def differential(profiles):
         new_data += [p.data[:-1] - p.data[1:]]
         new_desc += [p.description.copy()]
         d = new_desc[-1]
-        d['profiles'] = [{'operation': 'differential', 
+        d['profiles'] = [{'operation': 'differential',
                           'profiles': [x, y]} for x, y in zip(d['profiles'][:-1],
                                                               d['profiles'][1:])]
     return Profiles(new_data, new_desc)
 
 def show_profiles(profiles, height=None, fname=None, **kwargs):
     """Display a profiles stack with matplotlib.
-    
+
     Parameters
     ----------
     profiles : Profiles
@@ -679,7 +679,7 @@ def _figsize(profiles, height):
     hw_ratio = shape[1] / shape[0]
     width = height * hw_ratio * count
     return (width, 1.1 * height)
-    
+
 def _title(profile):
     """Process a title of a fig."""
     if profile['operation'] == 'differential':
@@ -734,7 +734,7 @@ def vectorize(profiles):
 
     See Also
     --------
-    Profiles.vectorize : get the vectors of profiles. 
+    Profiles.vectorize : get the vectors of profiles.
 
     Example
     -------
@@ -747,8 +747,6 @@ def vectorize(profiles):
     (5, 100, 100)
 
     """
-    if not isinstance(profiles, Profiles):
-        raise Exception
 
     return np.concatenate(profiles.data)
 

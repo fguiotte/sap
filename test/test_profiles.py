@@ -32,6 +32,13 @@ def test_create_profiles(image):
     assert len(ps) == 1
     assert ps.data.shape[0] == 7
 
+def test_profiles_str(profiles):
+    assert str(profiles).startswith('Profiles[{')
+
+def test_profiles_get(profiles):
+    p0 = profiles[0]
+    assert p0[0] == p0
+
 def test_create_profiles_assertions(image):
     # Not tree types
     with pytest.raises(TypeError):
@@ -131,6 +138,10 @@ def test_show_profiles(profiles, params, tmpdir):
         params['fname'] = tmpdir.join(params['fname'])
 
     sap.show_profiles(profiles[0], **params)
+    plt.close()
+
+def test_show_profiles_diff(profiles):
+    sap.show_profiles(profiles[0].diff(), height=10)
     plt.close()
 
 @pytest.mark.parametrize('params', [{}, {'height': 4}, {'fname': 'test.png'},

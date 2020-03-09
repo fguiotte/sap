@@ -99,9 +99,22 @@ def test_reconstruct_feature(max_tree, image, feature):
     assert filtered_image is not None, 'Reconstruct returned nothing'
 
 @pytest.mark.parametrize('filtering', ['direct', 'min', 'max', 'subtractive'])
-def test_reconstruct_feature(max_tree, image, filtering):
+def test_reconstruct_filtering(max_tree, image, filtering):
     filtered_image = max_tree.reconstruct(filtering=filtering)
     assert filtered_image is not None, 'Reconstruct returned nothing'
+
+    assert (filtered_image == image).all(), 'Reconstruct should return the image'
+
+@pytest.mark.parametrize('filtering', ['min', 'max', 'subtractive'])
+def test_reconstruct_filtering_increasing(max_tree, image, filtering):
+    threshold = 100
+    area = max_tree.get_attribute('area')
+
+    fdirect = max_tree.reconstruct(area < threshold, filtering='direct')
+    frule = max_tree.reconstruct(area < threshold, filtering=filtering)
+
+    assert (fdirect == frule).all(), \
+            'Filtering rule {} did not return same result than rule direct'.format(filtering)
 
 def test_str(max_tree):
     assert str(max_tree) == 'MaxTree{num_nodes: 20000, image.shape: (100, 100), image.dtype: int64}', \

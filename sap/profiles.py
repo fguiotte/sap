@@ -12,6 +12,11 @@ This submodule contains the attribute profiles related classes.
 Example
 -------
 
+>>> import sap
+>>> import numpy as np
+
+>>> image = np.arange(5*5).reshape(5, 5)
+
 Create the attribute profiles (AP) of `image` based on area attribute
 and three thresholds.
 
@@ -26,6 +31,41 @@ attributes.
 >>> eaps = sap.attribute_profiles(image, attributes)
 >>> eaps.vectorize()
 [[...]]
+
+Concatenation of profiles to create complex extended profiles.
+
+>>> profiles = sap.attribute_profiles(image, {'area': [10, 100]}) \
+...            + sap.feature_profiles(image, {'compactness': [.3, .7]}) \
+...            + sap.self_dual_attribute_profiles(image, {'height': [5, 15]})
+Profiles[{'attribute': 'area',
+  'filtering rule': 'direct',
+  'image': -7518820387991786804,
+  'name': 'attribute profiles',
+  'out feature': 'altitude',
+  'profiles': [{'operation': 'thinning', 'threshold': 100},
+               {'operation': 'thinning', 'threshold': 10},
+               {'operation': 'copy feature altitude'},
+               {'operation': 'thickening', 'threshold': 10},
+               {'operation': 'thickening', 'threshold': 100}]},
+ {'attribute': 'compactness',
+  'filtering rule': 'direct',
+  'image': -7518820387991786804,
+  'name': 'feature profiles',
+  'out feature': 'compactness',
+  'profiles': [{'operation': 'thinning', 'threshold': 0.7},
+               {'operation': 'thinning', 'threshold': 0.3},
+               {'operation': 'copy feature compactness'},
+               {'operation': 'thickening', 'threshold': 0.3},
+               {'operation': 'thickening', 'threshold': 0.7}]},
+ {'attribute': 'height',
+  'filtering rule': 'direct',
+  'image': -7518820387991786804,
+  'name': 'self dual attribute profiles',
+  'out feature': 'altitude',
+  'profiles': [{'operation': 'copy feature altitude'},
+               {'operation': 'sd filtering', 'threshold': 5},
+               {'operation': 'sd filtering', 'threshold': 15}]}]
+
 
 """
 
@@ -201,12 +241,14 @@ def create_profiles(image, attribute, tree_type,
 
     >>> sap.create_profiles(image, {'area': [5, 10]},
     ...                     (sap.MinTree, sap.MaxTree))
-
     Profiles{'attribute': 'area',
-     'image': -7204331716152014795,
+     'filtering rule': 'direct',
+     'image': -7518820387991786804,
+     'name': 'unknow',
+     'out feature': 'altitude',
      'profiles': [{'operation': 'thinning', 'threshold': 10},
                   {'operation': 'thinning', 'threshold': 5},
-                  {'operation': 'copy'},
+                  {'operation': 'copy feature altitude'},
                   {'operation': 'thickening', 'threshold': 5},
                   {'operation': 'thickening', 'threshold': 10}]}
 
@@ -314,15 +356,19 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None,
     Examples
     --------
 
-    >>> image = np.random.random((100, 100))
+    >>> image = np.arange(5*5).reshape(5,5)
+
     >>> sap.attribute_profiles(image, {'area': [10, 100]})
-    Profiles[{'attribute': 'area',
-    'image': 6508374204896978831,
-    'profiles': [{'operation': 'thinning', 'threshold': 100},
-                 {'operation': 'thinning', 'threshold': 10},
-                 {'operation': 'copy'},
-                 {'operation': 'thickening', 'threshold': 10},
-                 {'operation': 'thickening', 'threshold': 100}]}]
+    Profiles{'attribute': 'area',
+     'filtering rule': 'direct',
+     'image': -7518820387991786804,
+     'name': 'attribute profiles',
+     'out feature': 'altitude',
+     'profiles': [{'operation': 'thinning', 'threshold': 100},
+                  {'operation': 'thinning', 'threshold': 10},
+                  {'operation': 'copy feature altitude'},
+                  {'operation': 'thickening', 'threshold': 10},
+                  {'operation': 'thickening', 'threshold': 100}]}
 
     See Also
     --------
@@ -358,13 +404,18 @@ def self_dual_attribute_profiles(image, attribute, adjacency=4,
     Examples
     --------
 
-    >>> image = np.random.random((100, 100))
+    >>> image = np.arange(5*5).reshape(5,5)
+
     >>> sap.self_dual_attribute_profiles(image, {'area': [10, 100]})
     Profiles{'attribute': 'area',
-     'image': 2760575455804575354,
-     'profiles': [{'operation': 'copy'},
-                  {'operation': 'sdap filtering', 'threshold': 10},
-                  {'operation': 'sdap filtering', 'threshold': 100}]}
+     'filtering rule': 'direct',
+     'image': -7518820387991786804,
+     'name': 'self dual attribute profiles',
+     'out feature': 'altitude',
+     'profiles': [{'operation': 'copy feature altitude'},
+                  {'operation': 'sd filtering', 'threshold': 10},
+                  {'operation': 'sd filtering', 'threshold': 100}]}
+
     See Also
     --------
     sap.trees.available_attributes : List available attributes.
@@ -400,13 +451,18 @@ def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
     Examples
     --------
 
-    >>> image = np.random.random((100, 100))
+    >>> image = np.arange(5*5).reshape(5,5)
+
     >>> sap.self_dual_feature_profiles(image, {'area': [10, 100]})
     Profiles{'attribute': 'area',
-     'image': 2760575455804575354,
-     'profiles': [{'operation': 'copy'},
-                  {'operation': 'sdfp filtering', 'threshold': 10},
-                  {'operation': 'sdfp filtering', 'threshold': 100}]}
+     'filtering rule': 'direct',
+     'image': -7518820387991786804,
+     'name': 'self dual feature profiles',
+     'out feature': 'area',
+     'profiles': [{'operation': 'copy feature area'},
+                  {'operation': 'sd filtering', 'threshold': 10},
+                  {'operation': 'sd filtering', 'threshold': 100}]}
+
     See Also
     --------
     sap.trees.available_attributes : List available attributes.
@@ -446,12 +502,15 @@ def feature_profiles(image, attribute, adjacency=4, image_name=None,
 
     >>> sap.feature_profiles(image, {'area': [5, 10]})
     Profiles{'attribute': 'area',
-     'image': 3055489024601913429,
-     'profiles': [{'operation': 'feature profile thinning', 'threshold': 10},
-                  {'operation': 'feature profile thinning', 'threshold': 5},
-                  {'operation': 'copy'},
-                  {'operation': 'feature profile thickening', 'threshold': 5},
-                  {'operation': 'feature profile thickening', 'threshold': 10}]}
+     'filtering rule': 'direct',
+     'image': -7518820387991786804,
+     'name': 'feature profiles',
+     'out feature': 'area',
+     'profiles': [{'operation': 'thinning', 'threshold': 10},
+                  {'operation': 'thinning', 'threshold': 5},
+                  {'operation': 'copy feature area'},
+                  {'operation': 'thickening', 'threshold': 5},
+                  {'operation': 'thickening', 'threshold': 10}]}
 
     See Also
     --------

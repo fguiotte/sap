@@ -27,7 +27,7 @@ def profiles_b(image):
 
 def test_create_profiles(image):
     ps = sap.create_profiles(image, {'area': [10, 100, 1000]},
-            (sap.MinTree, sap.MaxTree), ('thinning', 'thickening'))
+            (sap.MinTree, sap.MaxTree))
 
     assert len(ps) == 1
     assert ps.data.shape[0] == 7
@@ -43,22 +43,16 @@ def test_create_profiles_assertions(image):
     # Not tree types
     with pytest.raises(TypeError):
         sap.create_profiles(image, {'area': [10, 100, 1000]},
-                (np.ndarray, np.ndarray), 'not a tree')
+                (np.ndarray, np.ndarray))
 
     with pytest.raises(TypeError):
         sap.create_profiles(image, {'area': [10, 100, 1000]},
-                np.ndarray, 'not a tree')
-
-    # Not operation names
-    with pytest.raises(TypeError):
-        sap.create_profiles(image, {'area': [10, 100, 1000]},
-                (sap.MinTree, sap.MaxTree))
+                np.ndarray)
 
     # Wrong out_feature
     with pytest.raises(ValueError):
         sap.create_profiles(image, {'area': [10, 100, 1000]},
-            (sap.MinTree, sap.MaxTree), ('thinning', 'thickening'),
-            out_feature='copy')
+            (sap.MinTree, sap.MaxTree), out_feature='copy')
 
 
 def test_self_dual_feature_profiles(image):

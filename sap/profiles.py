@@ -158,7 +158,7 @@ class Profiles:
         """
         return strip_profiles_copy(self)
 
-def create_profiles(image, attribute, tree_type, operation=None,
+def create_profiles(image, attribute, tree_type,
         adjacency=4, image_name=None, out_feature='altitude',
         filtering_rule='direct'):
     """
@@ -174,9 +174,6 @@ def create_profiles(image, attribute, tree_type, operation=None,
     tree_type : sap.trees.Tree, serie of sap.trees.Tree
         Tree or pair of tree for non dual filtering (e.g. min-tree and
         max-tree for attribute profiles).
-    operation : str or iterable of str
-        Name or names of the filtering processed by tree_type. Must
-        match tree_type count.
     adjacency : int, optional
         Adjacency used for the tree construction. Default is 4.
     image_name : str, optional
@@ -201,7 +198,8 @@ def create_profiles(image, attribute, tree_type, operation=None,
     >>> image = np.arange(5*5).reshape(5, 5)
 
     >>> sap.create_profiles(image, {'area': [5, 10]},
-    ...    (sap.MinTree, sap.MaxTree), ('thinning', 'thickening'))
+    ...                     (sap.MinTree, sap.MaxTree))
+
     Profiles{'attribute': 'area',
      'image': -7204331716152014795,
      'profiles': [{'operation': 'thinning', 'threshold': 10},
@@ -230,17 +228,6 @@ def create_profiles(image, attribute, tree_type, operation=None,
         raise TypeError('Parameter tree_type must be a tuple or a single type '\
         'of Tree, not {}'.format(tree_type))
 
-    # Get operation names
-    try:
-        if not ndual:
-            thickening_operation = operation
-        else:
-            thinning_operation = operation[0]
-            thickening_operation = operation[1]
-    except:
-        raise TypeError('Parameter oparation must match tree_type count, '\
-                'a single string or an iterable, not {}'.format(operation))
-
     # Check out_feature
     if not out_feature in ('same', 'altitude'):
         raise ValueError('Unknow value "{}" for parameter '\
@@ -257,8 +244,7 @@ def create_profiles(image, attribute, tree_type, operation=None,
         if ndual:
             # thinning
             prof, desc = _compute_profiles(thinning_tree, att,
-                    thresholds[::-1], thinning_operation, (ttq, tq), of,
-                    filtering_rule)
+                        thresholds[::-1], (ttq, tq), of, filtering_rule)
             profiles += prof
             profiles_description += desc
 
@@ -269,7 +255,7 @@ def create_profiles(image, attribute, tree_type, operation=None,
 
         # thickening
         prof, desc = _compute_profiles(thickening_tree, att, thresholds,
-                thickening_operation, (ttq, tq), of, filtering_rule)
+                                       (ttq, tq), of, filtering_rule)
         profiles += prof
         profiles_description += desc
 
@@ -284,14 +270,14 @@ def create_profiles(image, attribute, tree_type, operation=None,
 
     return Profiles(data, description)
 
-def _compute_profiles(tree, attribute, thresholds, operation, tqs, 
+def _compute_profiles(tree, attribute, thresholds, tqs,
         feature='altitude', rule='direct'):
     data = []
     desc = []
 
     for t in thresholds:
         for tq in tqs: tq.update()
-        desc += [{'operation': operation, 'threshold': t}]
+        desc += [{'operation': tree.operation_name, 'threshold': t}]
         deleted_nodes = tree.get_attribute(attribute) < t
         data += [tree.reconstruct(deleted_nodes, feature, rule)]
 
@@ -339,8 +325,7 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None,
 
     """
     return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
-            ('thinning', 'thickening'), adjacency, image_name, 'altitude',
-            filtering_rule)
+            adjacency, image_name, 'altitude', filtering_rule)
 
 def self_dual_attribute_profiles(image, attribute, adjacency=4,
         image_name=None, filtering_rule='direct'):
@@ -380,7 +365,7 @@ def self_dual_attribute_profiles(image, attribute, adjacency=4,
     attribute_profiles : other profiles.
 
     """
-    return create_profiles(image, attribute, trees.TosTree, 'sdap filtering',
+    return create_profiles(image, attribute, trees.TosTree,
                            adjacency, image_name, 'altitude', filtering_rule)
 
 def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
@@ -421,7 +406,7 @@ def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
     attribute_profiles : other profiles.
 
     """
-    return create_profiles(image, attribute, trees.TosTree, 'sdfp filtering',
+    return create_profiles(image, attribute, trees.TosTree,
                            adjacency, image_name, 'same', filtering_rule)
 
 def feature_profiles(image, attribute, adjacency=4, image_name=None,
@@ -467,7 +452,6 @@ def feature_profiles(image, attribute, adjacency=4, image_name=None,
 
     """
     return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
-            ('feature profile thinning', 'feature profile thickening'),
             adjacency, image_name, 'same', filtering_rule)
 
 def _show_profiles(profiles, height=None, fname=None, **kwargs):

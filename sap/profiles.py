@@ -444,6 +444,10 @@ def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
         The name of the image (optional). Useful to track filtering
         process and display. If not set, the name is replaced by the
         hash of the image.
+    out_feature : str or list, optional
+        Out feature of the profiles. Can be 'altitude' (default), 'same'
+        or a list of feature. If 'same' then out feature of the profiles
+        match the filtering attribute.
     filtering_rule: str, optional
         The filtering rule to use. It can be 'direct', 'min', 'max' or
         'subtractive'. Default is 'direct'.
@@ -491,6 +495,10 @@ def feature_profiles(image, attribute, adjacency=4, image_name=None,
         The name of the image (optional). Useful to track filtering
         process and display. If not set, the name is replaced by the
         hash of the image.
+    out_feature : str or list, optional
+        Out feature of the profiles. Can be 'altitude' (default), 'same'
+        or a list of feature. If 'same' then out feature of the profiles
+        match the filtering attribute.
     filtering_rule: str, optional
         The filtering rule to use. It can be 'direct', 'min', 'max' or
         'subtractive'. Default is 'direct'.

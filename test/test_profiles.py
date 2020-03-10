@@ -56,13 +56,15 @@ def test_create_profiles_assertions(image):
 
 
 def test_self_dual_feature_profiles(image):
-    sdfp = sap.self_dual_feature_profiles(image, {'area': [10, 100, 1000]})
+    sdfp = sap.self_dual_feature_profiles(image, {'area': [10, 100, 1000]},
+            ['area', 'compactness'])
 
     assert len(sdfp) == 1
     assert sdfp.data.shape[0] == 4
 
 def test_feature_profiles(image):
-    fp = sap.feature_profiles(image, {'area': [10, 100, 1000]})
+    fp = sap.feature_profiles(image, {'area': [10, 100, 1000]}, ['area',
+    'compactness'])
 
     assert len(fp) == 1
     assert fp.data.shape[0] == 7

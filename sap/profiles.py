@@ -160,7 +160,7 @@ class Profiles:
 
 def create_profiles(image, attribute, tree_type,
         adjacency=4, image_name=None, out_feature='altitude',
-        filtering_rule='direct'):
+        filtering_rule='direct', profiles_name='unknow'):
     """
     Compute the profiles of an images. Generic function.
 
@@ -180,14 +180,16 @@ def create_profiles(image, attribute, tree_type,
         The name of the image Useful to track filtering process and
         display. If not set, the name is replaced by the hash of the
         image.
-    out_feature: str, optional
-        Out feature of the profiles. Can be 'altitude' (default) or
-        'same' so that out feature of the profiles match the filtering
-        attribute (cf.  :func:`feature_profiles` and
-        :func:`self_dual_feature_profiles`).
-    filtering_rule: str, optional
+    out_feature : str or list, optional
+        Out feature of the profiles. Can be 'altitude' (default), 'same'
+        or a list of feature. If 'same' then out feature of the profiles
+        match the filtering attribute. Refer to :func:`feature_profiles`
+        and :func:`self_dual_feature_profiles` for more details.
+    filtering_rule : str, optional
         The filtering rule to use. It can be 'direct', 'min', 'max' or
         'subtractive'. Default is 'direct'.
+    profiles_name : str, optional
+        Name of the profiles (e.g. `'attribute profiles'`).
 
     Todo
     ----
@@ -262,10 +264,14 @@ def create_profiles(image, attribute, tree_type,
         tq.close()
 
         data += [np.stack(profiles)]
-        description += [{'attribute': att,
+        description += [{
+                         'name': profiles_name,
+                         'attribute': att,
                          'profiles': profiles_description,
                          'image': image_name if image_name else
-                         hash(image.data.tobytes())}]
+                         hash(image.data.tobytes()),
+                         'filtering rule': filtering_rule,
+                         'out feature': of}]
     ttq.close()
 
     return Profiles(data, description)
@@ -325,7 +331,8 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None,
 
     """
     return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
-            adjacency, image_name, 'altitude', filtering_rule)
+            adjacency, image_name, 'altitude', filtering_rule,
+            'attribute profiles')
 
 def self_dual_attribute_profiles(image, attribute, adjacency=4,
         image_name=None, filtering_rule='direct'):
@@ -366,7 +373,8 @@ def self_dual_attribute_profiles(image, attribute, adjacency=4,
 
     """
     return create_profiles(image, attribute, trees.TosTree,
-                           adjacency, image_name, 'altitude', filtering_rule)
+                           adjacency, image_name, 'altitude', filtering_rule,
+                           'self dual attribute profiles')
 
 def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
         filtering_rule='direct'):
@@ -407,7 +415,8 @@ def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
 
     """
     return create_profiles(image, attribute, trees.TosTree,
-                           adjacency, image_name, 'same', filtering_rule)
+                           adjacency, image_name, 'same', filtering_rule,
+                           'self dual feature profiles')
 
 def feature_profiles(image, attribute, adjacency=4, image_name=None,
         filtering_rule='direct'):
@@ -452,7 +461,7 @@ def feature_profiles(image, attribute, adjacency=4, image_name=None,
 
     """
     return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
-            adjacency, image_name, 'same', filtering_rule)
+            adjacency, image_name, 'same', filtering_rule, 'feature profiles')
 
 def _show_profiles(profiles, height=None, fname=None, **kwargs):
     assert len(profiles) == 1, 'Show profile only for one attribute at a time.'

@@ -273,7 +273,10 @@ class Tree:
         array([   1.,    1.,    1., ...,  998.,  999., 1000.])
 
         """
-        compute = getattr(hg, 'attribute_' + attribute_name)
+        try:
+            compute = getattr(hg, 'attribute_' + attribute_name)
+        except AttributeError:
+            raise ValueError('Wrong attribute or out feature: \'{}\'')
 
         if 'altitudes' in inspect.signature(compute).parameters:
             kwargs['altitudes'] = kwargs.get('altitudes', self._alt)

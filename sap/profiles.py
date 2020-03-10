@@ -230,48 +230,47 @@ def create_profiles(image, attribute, tree_type,
         raise TypeError('Parameter tree_type must be a tuple or a single type '\
         'of Tree, not {}'.format(tree_type))
 
-    # Check out_feature
-    if not out_feature in ('same', 'altitude'):
-        raise ValueError('Unknow value "{}" for parameter '\
-                'out_feature'.format(out_feature))
+    out_features = (out_feature, ) if isinstance(out_feature, str) else out_feature
 
-    iter_count = sum(len(x) for x in attribute.values()) * (1 + ndual) + len(attribute)
+    iter_count = (sum(len(x) for x in attribute.values()) * (1 + ndual) + \
+            len(attribute)) * len(out_features)
     ttq = tqdm(desc='Total', total=iter_count)
     for att, thresholds in attribute.items():
-        profiles = []; profiles_description = []
-        tq = tqdm(total=len(thresholds) * (1 + ndual) + 1, desc=att)
+        tq = tqdm(total=(len(thresholds) * (1 + ndual) + 1) * len(out_features), desc=att)
 
-        of = att if out_feature == 'same' else out_feature
+        for out_feature in out_features:
+            profiles = []; profiles_description = []
+            of = att if out_feature == 'same' else out_feature
 
-        if ndual:
-            # thinning
-            prof, desc = _compute_profiles(thinning_tree, att,
-                        thresholds[::-1], (ttq, tq), of, filtering_rule)
+            if ndual:
+                # thinning
+                prof, desc = _compute_profiles(thinning_tree, att,
+                            thresholds[::-1], (ttq, tq), of, filtering_rule)
+                profiles += prof
+                profiles_description += desc
+
+            # Origin
+            tq.update(); ttq.update()
+            profiles += [thickening_tree.reconstruct(feature=of)]
+            profiles_description += [{'operation': 'copy feature {}'.format(of)}]
+
+            # thickening
+            prof, desc = _compute_profiles(thickening_tree, att, thresholds,
+                                           (ttq, tq), of, filtering_rule)
             profiles += prof
             profiles_description += desc
 
-        # Origin
-        tq.update(); ttq.update()
-        profiles += [thickening_tree.reconstruct(feature=of)]
-        profiles_description += [{'operation': 'copy feature {}'.format(of)}]
 
-        # thickening
-        prof, desc = _compute_profiles(thickening_tree, att, thresholds,
-                                       (ttq, tq), of, filtering_rule)
-        profiles += prof
-        profiles_description += desc
-
+            data += [np.stack(profiles)]
+            description += [{
+                             'name': profiles_name,
+                             'attribute': att,
+                             'profiles': profiles_description,
+                             'image': image_name if image_name else
+                             hash(image.data.tobytes()),
+                             'filtering rule': filtering_rule,
+                             'out feature': of}]
         tq.close()
-
-        data += [np.stack(profiles)]
-        description += [{
-                         'name': profiles_name,
-                         'attribute': att,
-                         'profiles': profiles_description,
-                         'image': image_name if image_name else
-                         hash(image.data.tobytes()),
-                         'filtering rule': filtering_rule,
-                         'out feature': of}]
     ttq.close()
 
     return Profiles(data, description)
@@ -377,7 +376,7 @@ def self_dual_attribute_profiles(image, attribute, adjacency=4,
                            'self dual attribute profiles')
 
 def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
-        filtering_rule='direct'):
+        out_feature='same', filtering_rule='direct'):
     """
     Compute the self dual features profiles of an image.
 
@@ -415,11 +414,11 @@ def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
 
     """
     return create_profiles(image, attribute, trees.TosTree,
-                           adjacency, image_name, 'same', filtering_rule,
+                           adjacency, image_name, out_feature, filtering_rule,
                            'self dual feature profiles')
 
 def feature_profiles(image, attribute, adjacency=4, image_name=None,
-        filtering_rule='direct'):
+        out_feature='same', filtering_rule='direct'):
     """
     Compute the feature profiles of an image.
 
@@ -461,7 +460,7 @@ def feature_profiles(image, attribute, adjacency=4, image_name=None,
 
     """
     return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
-            adjacency, image_name, 'same', filtering_rule, 'feature profiles')
+            adjacency, image_name, out_feature, filtering_rule, 'feature profiles')
 
 def _show_profiles(profiles, height=None, fname=None, **kwargs):
     assert len(profiles) == 1, 'Show profile only for one attribute at a time.'

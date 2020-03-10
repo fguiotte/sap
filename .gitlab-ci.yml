@@ -55,6 +55,8 @@ pypi:
   start_in: '5 minutes'
   script:
     - pip install sap==${CI_COMMIT_REF_NAME}
+    - pip install pytest
+    - pytest
   only:
     - tags
 

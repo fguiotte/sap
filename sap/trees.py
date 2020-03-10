@@ -169,12 +169,13 @@ class Tree:
     `MinTree` instead.
 
     """
-    def __init__(self, image, adjacency):
+    def __init__(self, image, adjacency, operation_name='non def'):
         if self.__class__ == Tree:
             raise TypeError('Do not instantiate directly abstract class Tree.')
 
         self._adjacency = adjacency
         self._image = image
+        self.operation_name = operation_name
 
         if image is not None:
             self._graph = self._get_adjacency_graph()
@@ -272,7 +273,10 @@ class Tree:
         array([   1.,    1.,    1., ...,  998.,  999., 1000.])
 
         """
-        compute = getattr(hg, 'attribute_' + attribute_name)
+        try:
+            compute = getattr(hg, 'attribute_' + attribute_name)
+        except AttributeError:
+            raise ValueError('Wrong attribute or out feature: \'{}\'')
 
         if 'altitudes' in inspect.signature(compute).parameters:
             kwargs['altitudes'] = kwargs.get('altitudes', self._alt)
@@ -401,7 +405,7 @@ class MaxTree(Tree):
 
     """
     def __init__(self, image, adjacency=4):
-        super().__init__(image, adjacency)
+        super().__init__(image, adjacency, 'thickening')
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_max_tree(self._graph, self._image)
@@ -427,7 +431,7 @@ class MinTree(Tree):
 
     """
     def __init__(self, image, adjacency=4):
-        super().__init__(image, adjacency)
+        super().__init__(image, adjacency, 'thinning')
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_min_tree(self._graph, self._image)
@@ -456,7 +460,7 @@ class TosTree(Tree):
 
     """
     def __init__(self, image, adjacency=4):
-        super().__init__(image, adjacency)
+        super().__init__(image, adjacency, 'sd filtering')
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_tree_of_shapes_image2d(self._image)

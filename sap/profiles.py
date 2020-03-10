@@ -34,8 +34,8 @@ attributes.
 
 Concatenation of profiles to create complex extended profiles.
 
->>> profiles = sap.attribute_profiles(image, {'area': [10, 100]}) \
-...            + sap.feature_profiles(image, {'compactness': [.3, .7]}) \
+>>> profiles = sap.attribute_profiles(image, {'area': [10, 100]}) \\
+...            + sap.feature_profiles(image, {'compactness': [.3, .7]}) \\
 ...            + sap.self_dual_attribute_profiles(image, {'height': [5, 15]})
 Profiles[{'attribute': 'area',
   'filtering rule': 'direct',

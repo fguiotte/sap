@@ -117,7 +117,7 @@ def test_reconstruct_filtering_increasing(max_tree, image, filtering):
             'Filtering rule {} did not return same result than rule direct'.format(filtering)
 
 def test_str(max_tree):
-    assert str(max_tree) == 'MaxTree{num_nodes: 20000, image.shape: (100, 100), image.dtype: int64}', \
+    assert str(max_tree) == "MaxTree{'adjacency': 4,\n 'image.dtype': dtype('int64'),\n 'image.shape': (100, 100),\n 'image_hash': '0155fbbf',\n 'image_name': None,\n 'num_nodes': 20000}", \
     '__str__ of Tree did not returned expected output'
 
     mt = sap.MaxTree(None, None)

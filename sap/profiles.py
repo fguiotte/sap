@@ -101,7 +101,7 @@ class Profiles:
         return self.__repr__()
 
     def __repr__(self):
-        return 'Profiles' + pformat(self.description)
+        return self.__class__.__name__ + pformat(self.description)
 
     def __iter__(self):
         if self.len == 1:
@@ -304,12 +304,10 @@ def create_profiles(image, attribute, tree_type,
 
 
             data += [np.stack(profiles)]
-            description += [{
+            description += [{'tree': thickening_tree.get_params(),
                              'name': profiles_name,
                              'attribute': att,
                              'profiles': profiles_description,
-                             'image': image_name if image_name else
-                             hash(image.data.tobytes()),
                              'filtering rule': filtering_rule,
                              'out feature': of}]
         tq.close()
@@ -541,7 +539,7 @@ def _show_profiles(profiles, height=None, fname=None, **kwargs):
     if height is not None:
         plt.figure(figsize=_figsize(profiles, height))
 
-    suptitle = '{} - {}'.format(profiles.description['image'], profiles.description['attribute'])
+    suptitle = '{} - {}'.format(profiles.description['tree']['image_name'], profiles.description['attribute'])
 
     for i, (im, profile) in enumerate(zip(profiles.data, profiles.description['profiles'])):
         plt.subplot(1, len(profiles.data), i+1)
@@ -594,7 +592,7 @@ def show_all_profiles(profiles, attribute=None, image=None, height=None, fname=N
         profiles = filter(lambda x: x.description['attribute'] == attribute, profiles)
     # Same for image
     if image:
-        profiles = filter(lambda x: x.description['image'] == image, profiles)
+        profiles = filter(lambda x: x.description['tree']['image_name'] == image, profiles)
 
     for p in profiles:
         show_profiles(p, height, fname, **kwargs)

@@ -24,9 +24,11 @@ less than 100 pixels:
 
 import higra as hg
 import numpy as np
+from pprint import pformat
 import inspect
 import tempfile
 from pathlib import Path
+from .utils import *
 
 def available_attributes():
     """
@@ -169,10 +171,12 @@ class Tree:
     `MinTree` instead.
 
     """
-    def __init__(self, image, adjacency, operation_name='non def'):
+    def __init__(self, image, adjacency, image_name=None, operation_name='non def'):
         if self.__class__ == Tree:
             raise TypeError('Do not instantiate directly abstract class Tree.')
 
+        self._image_name = image_name
+        self._image_hash = ndarray_hash(image) if image is not None else None
         self._adjacency = adjacency
         self._image = image
         self.operation_name = operation_name
@@ -182,15 +186,22 @@ class Tree:
             self._construct()
 
     def __str__(self):
-        return self.__repr__()
+        return str(self.__repr__())
+
+    def get_params(self):
+        return {'image_name': self._image_name, 
+                'image_hash': self._image_hash,
+                'adjacency': self._adjacency}
 
     def __repr__(self):
         if hasattr(self, '_tree'):
-            rep = '{{num_nodes: {}, image.shape: {}, image.dtype: {}}}'.format(
-                   self.num_nodes(), self._image.shape, self._image.dtype)
+            rep = self.get_params()
+            rep.update({'num_nodes': self.num_nodes(), 
+                    'image.shape': self._image.shape,
+                    'image.dtype': self._image.dtype})
         else:
-            rep = '{}'
-        return self.__class__.__name__ + rep
+            rep = {}
+        return self.__class__.__name__ + pformat(rep)
 
     def _get_adjacency_graph(self):
         if self._adjacency == 4:
@@ -404,8 +415,8 @@ class MaxTree(Tree):
     Inherits all methods of `Tree` class.
 
     """
-    def __init__(self, image, adjacency=4):
-        super().__init__(image, adjacency, 'thickening')
+    def __init__(self, image, adjacency=4, image_name=None):
+        super().__init__(image, adjacency, image_name, 'thickening')
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_max_tree(self._graph, self._image)
@@ -430,8 +441,8 @@ class MinTree(Tree):
     Inherits all methods of `Tree` class.
 
     """
-    def __init__(self, image, adjacency=4):
-        super().__init__(image, adjacency, 'thinning')
+    def __init__(self, image, adjacency=4, image_name=None):
+        super().__init__(image, adjacency, image_name, 'thinning')
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_min_tree(self._graph, self._image)
@@ -459,8 +470,8 @@ class TosTree(Tree):
     - take into account adjacency
 
     """
-    def __init__(self, image, adjacency=4):
-        super().__init__(image, adjacency, 'sd filtering')
+    def __init__(self, image, adjacency=4, image_name=None):
+        super().__init__(image, adjacency, image_name, 'sd filtering')
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_tree_of_shapes_image2d(self._image)

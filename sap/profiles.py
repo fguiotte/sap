@@ -198,8 +198,7 @@ class Profiles:
         """
         return strip_profiles_copy(self)
 
-def create_profiles(image, attribute, tree_type,
-        adjacency=4, image_name=None, out_feature='altitude',
+def create_profiles(tree, attribute, out_feature='altitude',
         filtering_rule='direct', profiles_name='unknow'):
     """
     Compute the profiles of an images. Generic function.
@@ -258,19 +257,19 @@ def create_profiles(image, attribute, tree_type,
 
     # Create Trees
     try:
-        if isinstance(tree_type, type):
+        if isinstance(tree, trees.Tree):
             # Dual tree
             ndual = False
             thinning_tree = None
-            thickening_tree = tree_type(image, adjacency)
+            thickening_tree = tree
         else:
             # Non dual trees
             ndual = True
-            thinning_tree = tree_type[0](image, adjacency)
-            thickening_tree = tree_type[1](image, adjacency)
+            thinning_tree = tree[0]
+            thickening_tree = tree[1]
     except:
-        raise TypeError('Parameter tree_type must be a tuple or a single type '\
-        'of Tree, not {}'.format(tree_type))
+        raise TypeError('Parameter tree_type must be a tuple or a single' \
+                ' instance of Tree, not {}'.format(tree))
 
     out_features = (out_feature, ) if isinstance(out_feature, str) else out_feature
 
@@ -373,9 +372,11 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None,
     sap.trees.available_attributes : List available attributes.
 
     """
-    return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
-            adjacency, image_name, 'altitude', filtering_rule,
-            'attribute profiles')
+    maxt = trees.MaxTree(image, adjacency, image_name)
+    mint = trees.MinTree(image, adjacency, image_name)
+
+    return create_profiles((mint, maxt), attribute, 'altitude',
+            filtering_rule, 'attribute profiles')
 
 def self_dual_attribute_profiles(image, attribute, adjacency=4,
         image_name=None, filtering_rule='direct'):
@@ -420,9 +421,9 @@ def self_dual_attribute_profiles(image, attribute, adjacency=4,
     attribute_profiles : other profiles.
 
     """
-    return create_profiles(image, attribute, trees.TosTree,
-                           adjacency, image_name, 'altitude', filtering_rule,
-                           'self dual attribute profiles')
+    tost = trees.TosTree(image, adjacency, image_name)
+    return create_profiles(tost, attribute, 'altitude',
+                filtering_rule, 'self dual attribute profiles')
 
 def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
         out_feature='same', filtering_rule='direct'):
@@ -471,8 +472,8 @@ def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
     attribute_profiles : other profiles.
 
     """
-    return create_profiles(image, attribute, trees.TosTree,
-                           adjacency, image_name, out_feature, filtering_rule,
+    tost = trees.TosTree(image, adjacency, image_name)
+    return create_profiles(tost, attribute, out_feature, filtering_rule,
                            'self dual feature profiles')
 
 def feature_profiles(image, attribute, adjacency=4, image_name=None,
@@ -524,8 +525,11 @@ def feature_profiles(image, attribute, adjacency=4, image_name=None,
     attribute_profiles : other profiles.
 
     """
-    return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
-            adjacency, image_name, out_feature, filtering_rule, 'feature profiles')
+    maxt = trees.MaxTree(image, adjacency, image_name)
+    mint = trees.MinTree(image, adjacency, image_name)
+
+    return create_profiles((mint, maxt), attribute,
+               out_feature, filtering_rule, 'feature profiles')
 
 def _show_profiles(profiles, height=None, fname=None, **kwargs):
     assert len(profiles) == 1, 'Show profile only for one attribute at a time.'

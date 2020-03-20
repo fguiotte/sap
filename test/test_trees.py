@@ -24,6 +24,10 @@ def min_tree(image):
 def tos_tree(image):
     return sap.TosTree(image)
 
+@pytest.fixture
+def aplha_tree(image):
+    return sap.AlphaTree(image)
+
 def test_Tree_constructor():
     with pytest.raises(TypeError):
         sap.Tree(None, None)
@@ -42,6 +46,16 @@ def test_MinTree_constructor(image, adjacency):
 
 def test_TosTree_constructor(image):
     t = sap.TosTree(image)
+
+def test_AlphaTree_constructor(image):
+    t = sap.AlphaTree(image)
+
+def test_AlphaTree_exception(image):
+    with pytest.raises(AttributeError):
+        sap.AlphaTree(image, weight_function='L42')
+
+    with pytest.raises(NotImplementedError):
+        sap.AlphaTree(image, weight_function=np.array)
 
 def test_available_attributes(max_tree):
     att_dict = max_tree.available_attributes()

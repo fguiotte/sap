@@ -409,6 +409,9 @@ class MaxTree(Tree):
         determines the number of pixels to be taken into account in the
         neighborhood of each pixel. The allowed adjacency are 4 or 8.
         Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display.
 
     Notes
     -----
@@ -435,6 +438,9 @@ class MinTree(Tree):
         determines the number of pixels to be taken into account in the
         neighborhood of each pixel. The allowed adjacency are 4 or 8.
         Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display.
 
     Notes
     -----
@@ -460,6 +466,9 @@ class TosTree(Tree):
         determines the number of pixels to be taken into account in the
         neighborhood of each pixel. The allowed adjacency are 4 or 8.
         Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display.
 
     Notes
     -----
@@ -475,4 +484,47 @@ class TosTree(Tree):
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_tree_of_shapes_image2d(self._image)
+
+class AlphaTree(Tree):
+    """
+    Alpha tree, partition the image depending of the weight between pixels.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image to be represented by the tree structure.
+    adjacency : int
+        The pixel connectivity to use during the tree creation. It
+        determines the number of pixels to be taken into account in the
+        neighborhood of each pixel. The allowed adjacency are 4 or 8.
+        Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display.
+    weight_function : str or higra.WeightFunction
+        The weight function to use during the construction of the tree.
+        Can be 'L0', 'L1', 'L2', 'L2_squared', 'L_infinity', 'max',
+        'min', 'mean' or a `higra.WeightFunction`. The default is
+        'L1'.
+
+    """
+    def __init__(self, image, adjacency=4, image_name=None, weight_function='L1'): 
+        if isinstance(weight_function, str):
+            try:
+                self._weight_function = getattr(hg.WeightFunction, weight_function)
+            except AttributeError:
+                raise AttributeError('Wrong value \'{}\' for attribute' \
+                ' weight_function'.format(weight_function))
+        elif isinstance(weight_function, hg.higram.WeightFunction):
+            self._weight_function = weight_function
+        else:
+            raise NotImplementedError('Unknow type \'{}\' for parameter' \
+                    ' weight_function'.format(type(weight_function)))
+
+        super().__init__(image, adjacency, image_name, 'alpha filtering')
+
+    def _construct(self):
+        weight = hg.weight_graph(self._graph, self._image, self._weight_function)
+        self._tree, alt = hg.quasi_flat_zone_hierarchy(self._graph, weight)
+        self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)
 

@@ -111,7 +111,7 @@ def test_self_dual_attribute_profiles(image, attribute, adjacency,
          (8, {'area': [10, 100]}, 1, (3,)),
          (4, {'compactness': [.1, .5], 'volume': [100, 5000, 1000]}, 2, (3, 4))
         ])
-def test_self_dueal_feature_profiles(image, attribute, adjacency,
+def test_self_dual_feature_profiles(image, attribute, adjacency,
         exptd_stacks, exptd_profiles):
     sdfps = sap.self_dual_feature_profiles(image, attribute, adjacency)
 
@@ -120,6 +120,13 @@ def test_self_dueal_feature_profiles(image, attribute, adjacency,
 
     for ap, ep in zip(sdfps, exptd_profiles):
         assert ap.data.shape[0] == ep, 'Expected profiles count missmatch'
+
+def test_alpha_profiles(image):
+    ap = sap.alpha_profiles(image, {'area': [10, 100]})
+
+    assert len(ap) == 1
+
+    assert len(ap.data) == 3
 
 def test_attribute_profiles_assert(image):
     with pytest.raises(AttributeError) as e:

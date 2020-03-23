@@ -531,6 +531,50 @@ def feature_profiles(image, attribute, adjacency=4, image_name=None,
     return create_profiles((mint, maxt), attribute,
                out_feature, filtering_rule, 'feature profiles')
 
+def alpha_profiles(image, attribute, adjacency=4,
+                   image_name=None, filtering_rule='direct'):
+    """
+    Compute the alpha profiles of an image.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image
+    attribute : dict
+        Dictionary of attribute (as key, str) with according thresholds
+        (as values, number).
+    adjacency : int
+        Adjacency used for the tree construction. Default is 4.
+    image_name : str
+        The name of the image (optional). Useful to track filtering
+        process and display. If not set, the name is replaced by the
+        hash of the image.
+    filtering_rule: str, optional
+        The filtering rule to use. It can be 'direct', 'min', 'max' or
+        'subtractive'. Default is 'direct'.
+
+    Examples
+    --------
+
+    >>> image = np.arange(5 * 5).reshape(5, 5)
+    >>> sap.alpha_profiles(image, {'area': [10, 100]})
+    Profiles{'attribute': 'area',
+     'filtering rule': 'direct',
+     'name': 'alpha profiles',
+     'out feature': 'altitude',
+     'profiles': [{'operation': 'copy feature altitude'},
+                  {'operation': 'alpha filtering', 'threshold': 10},
+                  {'operation': 'alpha filtering', 'threshold': 100}],
+     'tree': {'adjacency': 4, 'image_hash': '44f17c0f', 'image_name': None}}
+
+    See Also
+    --------
+    sap.trees.available_attributes : List available attributes.
+
+    """
+    atree = trees.AlphaTree(image, adjacency, image_name)
+    return create_profiles(atree, attribute, 'altitude', filtering_rule, 'alpha profiles')
+
 def _show_profiles(profiles, height=None, fname=None, **kwargs):
     assert len(profiles) == 1, 'Show profile only for one attribute at a time.'
 

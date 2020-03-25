@@ -24,6 +24,10 @@ def min_tree(image):
 def tos_tree(image):
     return sap.TosTree(image)
 
+@pytest.fixture
+def aplha_tree(image):
+    return sap.AlphaTree(image)
+
 def test_Tree_constructor():
     with pytest.raises(TypeError):
         sap.Tree(None, None)
@@ -42,6 +46,19 @@ def test_MinTree_constructor(image, adjacency):
 
 def test_TosTree_constructor(image):
     t = sap.TosTree(image)
+
+def test_AlphaTree_constructor(image):
+    t = sap.AlphaTree(image)
+
+def test_OmegaTree_constructor(image):
+    t = sap.OmegaTree(image)
+
+def test_AlphaTree_exception(image):
+    with pytest.raises(AttributeError):
+        sap.AlphaTree(image, weight_function='L42')
+
+    with pytest.raises(NotImplementedError):
+        sap.AlphaTree(image, weight_function=np.array)
 
 def test_available_attributes(max_tree):
     att_dict = max_tree.available_attributes()
@@ -117,7 +134,7 @@ def test_reconstruct_filtering_increasing(max_tree, image, filtering):
             'Filtering rule {} did not return same result than rule direct'.format(filtering)
 
 def test_str(max_tree):
-    assert str(max_tree) == 'MaxTree{num_nodes: 20000, image.shape: (100, 100), image.dtype: int64}', \
+    assert str(max_tree) == "MaxTree{'adjacency': 4,\n 'image.dtype': dtype('int64'),\n 'image.shape': (100, 100),\n 'image_hash': '0155fbbf',\n 'image_name': None,\n 'num_nodes': 20000}", \
     '__str__ of Tree did not returned expected output'
 
     mt = sap.MaxTree(None, None)

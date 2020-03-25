@@ -101,7 +101,7 @@ class Profiles:
         return self.__repr__()
 
     def __repr__(self):
-        return 'Profiles' + pformat(self.description)
+        return self.__class__.__name__ + pformat(self.description)
 
     def __iter__(self):
         if self.len == 1:
@@ -198,8 +198,7 @@ class Profiles:
         """
         return strip_profiles_copy(self)
 
-def create_profiles(image, attribute, tree_type,
-        adjacency=4, image_name=None, out_feature='altitude',
+def create_profiles(tree, attribute, out_feature='altitude',
         filtering_rule='direct', profiles_name='unknow'):
     """
     Compute the profiles of an images. Generic function.
@@ -258,19 +257,19 @@ def create_profiles(image, attribute, tree_type,
 
     # Create Trees
     try:
-        if isinstance(tree_type, type):
+        if isinstance(tree, trees.Tree):
             # Dual tree
             ndual = False
             thinning_tree = None
-            thickening_tree = tree_type(image, adjacency)
+            thickening_tree = tree
         else:
             # Non dual trees
             ndual = True
-            thinning_tree = tree_type[0](image, adjacency)
-            thickening_tree = tree_type[1](image, adjacency)
+            thinning_tree = tree[0]
+            thickening_tree = tree[1]
     except:
-        raise TypeError('Parameter tree_type must be a tuple or a single type '\
-        'of Tree, not {}'.format(tree_type))
+        raise TypeError('Parameter tree_type must be a tuple or a single' \
+                ' instance of Tree, not {}'.format(tree))
 
     out_features = (out_feature, ) if isinstance(out_feature, str) else out_feature
 
@@ -304,12 +303,10 @@ def create_profiles(image, attribute, tree_type,
 
 
             data += [np.stack(profiles)]
-            description += [{
+            description += [{'tree': thickening_tree.get_params(),
                              'name': profiles_name,
                              'attribute': att,
                              'profiles': profiles_description,
-                             'image': image_name if image_name else
-                             hash(image.data.tobytes()),
                              'filtering rule': filtering_rule,
                              'out feature': of}]
         tq.close()
@@ -375,9 +372,11 @@ def attribute_profiles(image, attribute, adjacency=4, image_name=None,
     sap.trees.available_attributes : List available attributes.
 
     """
-    return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
-            adjacency, image_name, 'altitude', filtering_rule,
-            'attribute profiles')
+    maxt = trees.MaxTree(image, adjacency, image_name)
+    mint = trees.MinTree(image, adjacency, image_name)
+
+    return create_profiles((mint, maxt), attribute, 'altitude',
+            filtering_rule, 'attribute profiles')
 
 def self_dual_attribute_profiles(image, attribute, adjacency=4,
         image_name=None, filtering_rule='direct'):
@@ -422,9 +421,9 @@ def self_dual_attribute_profiles(image, attribute, adjacency=4,
     attribute_profiles : other profiles.
 
     """
-    return create_profiles(image, attribute, trees.TosTree,
-                           adjacency, image_name, 'altitude', filtering_rule,
-                           'self dual attribute profiles')
+    tost = trees.TosTree(image, adjacency, image_name)
+    return create_profiles(tost, attribute, 'altitude',
+                filtering_rule, 'self dual attribute profiles')
 
 def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
         out_feature='same', filtering_rule='direct'):
@@ -473,8 +472,8 @@ def self_dual_feature_profiles(image, attribute, adjacency=4, image_name=None,
     attribute_profiles : other profiles.
 
     """
-    return create_profiles(image, attribute, trees.TosTree,
-                           adjacency, image_name, out_feature, filtering_rule,
+    tost = trees.TosTree(image, adjacency, image_name)
+    return create_profiles(tost, attribute, out_feature, filtering_rule,
                            'self dual feature profiles')
 
 def feature_profiles(image, attribute, adjacency=4, image_name=None,
@@ -526,8 +525,99 @@ def feature_profiles(image, attribute, adjacency=4, image_name=None,
     attribute_profiles : other profiles.
 
     """
-    return create_profiles(image, attribute, (trees.MinTree, trees.MaxTree),
-            adjacency, image_name, out_feature, filtering_rule, 'feature profiles')
+    maxt = trees.MaxTree(image, adjacency, image_name)
+    mint = trees.MinTree(image, adjacency, image_name)
+
+    return create_profiles((mint, maxt), attribute,
+               out_feature, filtering_rule, 'feature profiles')
+
+def alpha_profiles(image, attribute, adjacency=4,
+                   image_name=None, filtering_rule='direct'):
+    """
+    Compute the alpha profiles of an image.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image
+    attribute : dict
+        Dictionary of attribute (as key, str) with according thresholds
+        (as values, number).
+    adjacency : int
+        Adjacency used for the tree construction. Default is 4.
+    image_name : str
+        The name of the image (optional). Useful to track filtering
+        process and display. If not set, the name is replaced by the
+        hash of the image.
+    filtering_rule: str, optional
+        The filtering rule to use. It can be 'direct', 'min', 'max' or
+        'subtractive'. Default is 'direct'.
+
+    Examples
+    --------
+
+    >>> image = np.arange(5 * 5).reshape(5, 5)
+    >>> sap.alpha_profiles(image, {'area': [10, 100]})
+    Profiles{'attribute': 'area',
+     'filtering rule': 'direct',
+     'name': 'alpha profiles',
+     'out feature': 'altitude',
+     'profiles': [{'operation': 'copy feature altitude'},
+                  {'operation': 'alpha filtering', 'threshold': 10},
+                  {'operation': 'alpha filtering', 'threshold': 100}],
+     'tree': {'adjacency': 4, 'image_hash': '44f17c0f', 'image_name': None}}
+
+    See Also
+    --------
+    sap.trees.available_attributes : List available attributes.
+
+    """
+    atree = trees.AlphaTree(image, adjacency, image_name)
+    return create_profiles(atree, attribute, 'altitude', filtering_rule, 'alpha profiles')
+
+def omega_profiles(image, attribute, adjacency=4,
+                   image_name=None, filtering_rule='direct'):
+    """
+    Compute the omega profiles of an image.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image
+    attribute : dict
+        Dictionary of attribute (as key, str) with according thresholds
+        (as values, number).
+    adjacency : int
+        Adjacency used for the tree construction. Default is 4.
+    image_name : str
+        The name of the image (optional). Useful to track filtering
+        process and display. If not set, the name is replaced by the
+        hash of the image.
+    filtering_rule: str, optional
+        The filtering rule to use. It can be 'direct', 'min', 'max' or
+        'subtractive'. Default is 'direct'.
+
+    Examples
+    --------
+
+    >>> image = np.arange(5 * 5).reshape(5, 5)
+    >>> sap.omega_profiles(image, {'area': [10, 100]})
+    Profiles{'attribute': 'area',
+     'filtering rule': 'direct',
+     'name': 'omega profiles',
+     'out feature': 'altitude',
+     'profiles': [{'operation': 'copy feature altitude'},
+                  {'operation': '(ω) filtering', 'threshold': 10},
+                  {'operation': '(ω) filtering', 'threshold': 100}],
+     'tree': {'adjacency': 4, 'image_hash': '44f17c0f', 'image_name': None}}
+
+    See Also
+    --------
+    sap.trees.available_attributes : List available attributes.
+
+    """
+    otree = trees.OmegaTree(image, adjacency, image_name)
+    return create_profiles(otree, attribute, 'altitude', filtering_rule, 'omega profiles')
 
 def _show_profiles(profiles, height=None, fname=None, **kwargs):
     assert len(profiles) == 1, 'Show profile only for one attribute at a time.'
@@ -541,7 +631,7 @@ def _show_profiles(profiles, height=None, fname=None, **kwargs):
     if height is not None:
         plt.figure(figsize=_figsize(profiles, height))
 
-    suptitle = '{} - {}'.format(profiles.description['image'], profiles.description['attribute'])
+    suptitle = '{} - {}'.format(profiles.description['tree']['image_name'], profiles.description['attribute'])
 
     for i, (im, profile) in enumerate(zip(profiles.data, profiles.description['profiles'])):
         plt.subplot(1, len(profiles.data), i+1)
@@ -594,7 +684,7 @@ def show_all_profiles(profiles, attribute=None, image=None, height=None, fname=N
         profiles = filter(lambda x: x.description['attribute'] == attribute, profiles)
     # Same for image
     if image:
-        profiles = filter(lambda x: x.description['image'] == image, profiles)
+        profiles = filter(lambda x: x.description['tree']['image_name'] == image, profiles)
 
     for p in profiles:
         show_profiles(p, height, fname, **kwargs)

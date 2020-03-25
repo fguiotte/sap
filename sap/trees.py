@@ -24,9 +24,11 @@ less than 100 pixels:
 
 import higra as hg
 import numpy as np
+from pprint import pformat
 import inspect
 import tempfile
 from pathlib import Path
+from .utils import *
 
 def available_attributes():
     """
@@ -169,10 +171,12 @@ class Tree:
     `MinTree` instead.
 
     """
-    def __init__(self, image, adjacency, operation_name='non def'):
+    def __init__(self, image, adjacency, image_name=None, operation_name='non def'):
         if self.__class__ == Tree:
             raise TypeError('Do not instantiate directly abstract class Tree.')
 
+        self._image_name = image_name
+        self._image_hash = ndarray_hash(image) if image is not None else None
         self._adjacency = adjacency
         self._image = image
         self.operation_name = operation_name
@@ -182,15 +186,22 @@ class Tree:
             self._construct()
 
     def __str__(self):
-        return self.__repr__()
+        return str(self.__repr__())
+
+    def get_params(self):
+        return {'image_name': self._image_name, 
+                'image_hash': self._image_hash,
+                'adjacency': self._adjacency}
 
     def __repr__(self):
         if hasattr(self, '_tree'):
-            rep = '{{num_nodes: {}, image.shape: {}, image.dtype: {}}}'.format(
-                   self.num_nodes(), self._image.shape, self._image.dtype)
+            rep = self.get_params()
+            rep.update({'num_nodes': self.num_nodes(), 
+                    'image.shape': self._image.shape,
+                    'image.dtype': self._image.dtype})
         else:
-            rep = '{}'
-        return self.__class__.__name__ + rep
+            rep = {}
+        return self.__class__.__name__ + pformat(rep)
 
     def _get_adjacency_graph(self):
         if self._adjacency == 4:
@@ -398,14 +409,17 @@ class MaxTree(Tree):
         determines the number of pixels to be taken into account in the
         neighborhood of each pixel. The allowed adjacency are 4 or 8.
         Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display.
 
     Notes
     -----
     Inherits all methods of `Tree` class.
 
     """
-    def __init__(self, image, adjacency=4):
-        super().__init__(image, adjacency, 'thickening')
+    def __init__(self, image, adjacency=4, image_name=None):
+        super().__init__(image, adjacency, image_name, 'thickening')
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_max_tree(self._graph, self._image)
@@ -424,14 +438,17 @@ class MinTree(Tree):
         determines the number of pixels to be taken into account in the
         neighborhood of each pixel. The allowed adjacency are 4 or 8.
         Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display.
 
     Notes
     -----
     Inherits all methods of `Tree` class.
 
     """
-    def __init__(self, image, adjacency=4):
-        super().__init__(image, adjacency, 'thinning')
+    def __init__(self, image, adjacency=4, image_name=None):
+        super().__init__(image, adjacency, image_name, 'thinning')
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_min_tree(self._graph, self._image)
@@ -449,6 +466,9 @@ class TosTree(Tree):
         determines the number of pixels to be taken into account in the
         neighborhood of each pixel. The allowed adjacency are 4 or 8.
         Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display.
 
     Notes
     -----
@@ -459,9 +479,78 @@ class TosTree(Tree):
     - take into account adjacency
 
     """
-    def __init__(self, image, adjacency=4):
-        super().__init__(image, adjacency, 'sd filtering')
+    def __init__(self, image, adjacency=4, image_name=None):
+        super().__init__(image, adjacency, image_name, 'sd filtering')
 
     def _construct(self):
         self._tree, self._alt = hg.component_tree_tree_of_shapes_image2d(self._image)
+
+class AlphaTree(Tree):
+    """
+    Alpha tree, partition the image depending of the weight between pixels.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image to be represented by the tree structure.
+    adjacency : int
+        The pixel connectivity to use during the tree creation. It
+        determines the number of pixels to be taken into account in the
+        neighborhood of each pixel. The allowed adjacency are 4 or 8.
+        Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display.
+    weight_function : str or higra.WeightFunction
+        The weight function to use during the construction of the tree.
+        Can be 'L0', 'L1', 'L2', 'L2_squared', 'L_infinity', 'max',
+        'min', 'mean' or a `higra.WeightFunction`. The default is
+        'L1'.
+
+    """
+    def __init__(self, image, adjacency=4, image_name=None, weight_function='L1'): 
+        if isinstance(weight_function, str):
+            try:
+                self._weight_function = getattr(hg.WeightFunction, weight_function)
+            except AttributeError:
+                raise AttributeError('Wrong value \'{}\' for attribute' \
+                ' weight_function'.format(weight_function))
+        elif isinstance(weight_function, hg.higram.WeightFunction):
+            self._weight_function = weight_function
+        else:
+            raise NotImplementedError('Unknow type \'{}\' for parameter' \
+                    ' weight_function'.format(type(weight_function)))
+
+        super().__init__(image, adjacency, image_name, 'alpha filtering')
+
+    def _construct(self):
+        weight = hg.weight_graph(self._graph, self._image, self._weight_function)
+        self._tree, alt = hg.quasi_flat_zone_hierarchy(self._graph, weight)
+        self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)
+
+
+class OmegaTree(Tree):
+    """
+    Partition the image depending of the constrained weight between pixels.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image to be represented by the tree structure.
+    adjacency : int
+        The pixel connectivity to use during the tree creation. It
+        determines the number of pixels to be taken into account in the
+        neighborhood of each pixel. The allowed adjacency are 4 or 8.
+        Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display.
+
+    """
+    def __init__(self, image, adjacency=4, image_name=None): #, weight_function='L2_squared'):         
+        super().__init__(image, adjacency, image_name, '(ω) filtering')
+
+    def _construct(self):
+        self._tree, alt = hg.constrained_connectivity_hierarchy_alpha_omega(self._graph, self._image)
+        self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)
 

@@ -43,9 +43,10 @@ def ndarray_hash(x, l=8, c=1000):
     will take a fixed amount of time, no matter the size of the data.
 
     This hash function output a hash of $x$ in hexadecimal. The length
-    of the hash is $l$. The hashes are consistent when tuning the length
-    $l$: shorter hashes are contained in the longer ones for the same
-    data $x$. The samples count taken in $x$ is $\\frac{l \\times c}{2}$.
+    of the hash is :math:`l`. The hashes are consistent when tuning the
+    length :math:`l`: shorter hashes are contained in the longer ones
+    for the same data :math:`x`. The samples count taken in :math:`x` is
+    :math:`\frac{l \times c}{2}`.
 
     """
     rs = np.random.RandomState(42)

@@ -14,7 +14,7 @@ Various utilities unrelated to trees or profiles.
 import numpy as np
 
 def ndarray_hash(x, l=8, c=1000):
-    """ 
+    """
     Compute a hash from a numpy array.
 
     Parameters
@@ -22,7 +22,7 @@ def ndarray_hash(x, l=8, c=1000):
     x : ndarray
         The array to hash.
     l : int, optional
-        The length of the hash. Must be an even number. 
+        The length of the hash. Must be an even number.
     c : int, optional
         A variable to affect the sampling of the hash. It has to be the
         same along the matching process. Refer to notes.
@@ -45,7 +45,7 @@ def ndarray_hash(x, l=8, c=1000):
     This hash function output a hash of $x$ in hexadecimal. The length
     of the hash is $l$. The hashes are consistent when tuning the length
     $l$: shorter hashes are contained in the longer ones for the same
-    data $x$. The samples count taken in $x$ is $\frac{l \times c}{2}$.
+    data $x$. The samples count taken in $x$ is $\\frac{l \\times c}{2}$.
 
     """
     rs = np.random.RandomState(42)

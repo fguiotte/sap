@@ -11,5 +11,6 @@ Submodules
 
 .. toctree::
 
-   sap.profiles
    sap.trees
+   sap.profiles
+   sap.utils

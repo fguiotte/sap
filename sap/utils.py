@@ -46,7 +46,7 @@ def ndarray_hash(x, l=8, c=1000):
     of the hash is :math:`l`. The hashes are consistent when tuning the
     length :math:`l`: shorter hashes are contained in the longer ones
     for the same data :math:`x`. The samples count taken in :math:`x` is
-    :math:`\frac{l \times c}{2}`.
+    :math:`\\frac{l \\times c}{2}`.
 
     """
     rs = np.random.RandomState(42)

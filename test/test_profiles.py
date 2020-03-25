@@ -121,6 +121,13 @@ def test_self_dual_feature_profiles(image, attribute, adjacency,
     for ap, ep in zip(sdfps, exptd_profiles):
         assert ap.data.shape[0] == ep, 'Expected profiles count missmatch'
 
+def test_omega_profiles(image):
+    ap = sap.omega_profiles(image, {'area': [10, 100]})
+
+    assert len(ap) == 1
+
+    assert len(ap.data) == 3
+
 def test_alpha_profiles(image):
     ap = sap.alpha_profiles(image, {'area': [10, 100]})
 

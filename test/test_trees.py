@@ -50,6 +50,9 @@ def test_TosTree_constructor(image):
 def test_AlphaTree_constructor(image):
     t = sap.AlphaTree(image)
 
+def test_OmegaTree_constructor(image):
+    t = sap.OmegaTree(image)
+
 def test_AlphaTree_exception(image):
     with pytest.raises(AttributeError):
         sap.AlphaTree(image, weight_function='L42')

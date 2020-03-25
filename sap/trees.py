@@ -528,3 +528,29 @@ class AlphaTree(Tree):
         self._tree, alt = hg.quasi_flat_zone_hierarchy(self._graph, weight)
         self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)
 
+
+class OmegaTree(Tree):
+    """
+    Partition the image depending of the constrained weight between pixels.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image to be represented by the tree structure.
+    adjacency : int
+        The pixel connectivity to use during the tree creation. It
+        determines the number of pixels to be taken into account in the
+        neighborhood of each pixel. The allowed adjacency are 4 or 8.
+        Default is 4.
+    image_name : str, optional
+        The name of the image Useful to track filtering process and
+        display.
+
+    """
+    def __init__(self, image, adjacency=4, image_name=None): #, weight_function='L2_squared'):         
+        super().__init__(image, adjacency, image_name, '(ω) filtering')
+
+    def _construct(self):
+        self._tree, alt = hg.constrained_connectivity_hierarchy_alpha_omega(self._graph, self._image)
+        self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)
+

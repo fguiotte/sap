@@ -126,6 +126,8 @@ class Profiles:
 
     def diff(self):
         """Compute the differential of profiles.
+            
+        Refer to :func:`differential` for full documentation.
 
         Returns
         -------
@@ -134,6 +136,24 @@ class Profiles:
 
         """
         return differential(self)
+
+    def lf(self, local_feature=(np.mean, np.std), patch_size=7):
+        """Compute the local features of profiles
+
+        Refer to :func:`local_features` for full documentation.
+
+        local_feature : function or tuple of functions
+            The function(s) to describe the local patches.
+        patch_size : int
+            The size of the patches.
+
+        Returns
+        -------
+        local_features : Profiles
+            The local features of ``profiles``.
+
+        """
+        return local_features(self, local_feature, patch_size)
 
     def vectorize(self):
         """Return the vectors of the profiles.
@@ -824,7 +844,7 @@ def differential(profiles):
                                                               d['profiles'][1:])]
     return Profiles(new_data, new_desc)
 
-def local_feature(profiles, local_feature=(np.mean, np.std), patch_size=7):
+def local_features(profiles, local_feature=(np.mean, np.std), patch_size=7):
     """Compute the local features of profiles
     
     Parameters

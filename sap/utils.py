@@ -42,11 +42,11 @@ def ndarray_hash(x, l=8, c=1000):
     computation. By fixing the number of samples the hash computation
     will take a fixed amount of time, no matter the size of the data.
 
-    This hash function output a hash of $x$ in hexadecimal. The length
-    of the hash is :math:`l`. The hashes are consistent when tuning the
-    length :math:`l`: shorter hashes are contained in the longer ones
-    for the same data :math:`x`. The samples count taken in :math:`x` is
-    :math:`\\frac{l \\times c}{2}`.
+    This hash function output a hash of :math:`x` in hexadecimal. The
+    length of the hash is :math:`l`. The hashes are consistent when
+    tuning the length :math:`l`: shorter hashes are contained in the
+    longer ones for the same data :math:`x`. The samples count taken in
+    :math:`x` is :math:`\\frac{l \\times c}{2}`.
 
     """
     rs = np.random.RandomState(42)
@@ -64,7 +64,7 @@ def local_patch(arr, patch_size=7):
         The input data.
     patch_size : int
         The size :math:`w` of the patches. For a 2D nadarray the
-        returned patch size will be :math:`w \times w`.
+        returned patch size will be :math:`w \\times w`.
 
     Returns
     -------
@@ -91,7 +91,7 @@ def local_patch(arr, patch_size=7):
     return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides, writeable=False)
 
 def local_patch_f(arr, patch_size=7, f=np.mean):
-    """
+    """local_patch_f(arr, patch_size=7, f=np.mean)
     Describe local patches around each value of the array
 
     Parameters

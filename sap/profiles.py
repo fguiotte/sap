@@ -75,6 +75,7 @@ from pprint import pformat
 from matplotlib import pyplot as plt
 from pathlib import Path
 from . import trees
+from .utils import *
 
 class Profiles:
     """
@@ -802,8 +803,8 @@ def differential(profiles):
     Parameters
     ----------
     profiles : Profiles
-        Attribute profiles or other profiles to process the differential
-        on.
+        Attribute profiles or other profiles to process the 
+        differential on.
 
     Returns
     -------
@@ -821,6 +822,44 @@ def differential(profiles):
         d['profiles'] = [{'operation': 'differential',
                           'profiles': [x, y]} for x, y in zip(d['profiles'][:-1],
                                                               d['profiles'][1:])]
+    return Profiles(new_data, new_desc)
+
+def local_feature(profiles, local_feature=(np.mean, np.std), patch_size=7):
+    """Compute the local features of profiles
+    
+    Parameters
+    ----------
+    profiles : Profiles
+        Input Profiles.
+    local_feature : function or tuple of functions
+        The function(s) to describe the local patches.
+    patch_size : int
+        The size of the patches.
+
+    Returns
+    -------
+    local_feature : Profiles
+        The local features of ``profiles``.
+
+    """
+    try:
+        iter(local_feature)
+    except TypeError:
+        local_feature = (local_feature,)
+    
+    new_data = []
+    new_desc = []
+    
+    for p in profiles:
+        for f in local_feature:
+            nd = [local_patch_f(d, patch_size, f) for d in p.data]
+            new_data += [np.array(nd)]
+            new_desc += [p.description.copy()]
+            d = new_desc[-1]
+            d['profiles'] = [{'operation': 'local feature',
+                              'function': f.__name__,
+                              'patch size': patch_size,
+                              'profile': x} for x in d['profiles']]
     return Profiles(new_data, new_desc)
 
 def show_profiles(profiles, height=None, fname=None, **kwargs):
@@ -858,6 +897,9 @@ def _title(profile):
     if profile['operation'] == 'differential':
         p1, p2 = profile['profiles']
         return 'differential ({}, {})'.format(_title(p1), _title(p2))
+    elif profile['operation'] == 'local feature':
+        p = profile['profile']
+        return 'local feature {} ({})'.format(profile['function'], _title(p))
     else:
         return ' '.join([str(x) for x in profile.values()])
 

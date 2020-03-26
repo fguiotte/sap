@@ -171,6 +171,18 @@ def test_show_all_profiles(profiles, params, tmpdir):
 def test_differential(profiles):
     sap.differential(profiles)
 
+def test_local_features(profiles):
+    # default
+    sap.local_features(profiles)
+
+    # Embeded
+    profiles.lf()
+
+    # set one lf
+    lfp = sap.local_features(profiles, np.mean)
+
+    assert len(lfp) == len(profiles)
+
 def test_profiles_m_diff(profiles):
     profiles.diff()
 

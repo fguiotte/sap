@@ -138,7 +138,8 @@ class Profiles:
         return differential(self)
 
     def lf(self, local_feature=(np.mean, np.std), patch_size=7):
-        """Compute the local features of profiles
+        """lf(self, local_feature=(np.mean, np.std), patch_size=7)
+        Compute the local features of profiles
 
         Refer to :func:`local_features` for full documentation.
 
@@ -845,7 +846,8 @@ def differential(profiles):
     return Profiles(new_data, new_desc)
 
 def local_features(profiles, local_feature=(np.mean, np.std), patch_size=7):
-    """Compute the local features of profiles
+    """local_features(profiles, local_feature=(np.mean, np.std), patch_size=7)
+    Compute the local features of profiles
     
     Parameters
     ----------

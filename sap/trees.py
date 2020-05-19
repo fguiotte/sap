@@ -551,6 +551,19 @@ class OmegaTree(Tree):
         super().__init__(image, adjacency, image_name, '(ω) filtering')
 
     def _construct(self):
-        self._tree, alt = hg.constrained_connectivity_hierarchy_alpha_omega(self._graph, self._image)
+        graph = hg.get_4_adjacency_graph(self._image.shape)
+        edge_weights = hg.weight_graph(graph, self._image, getattr(hg.WeightFunction, 'L1'))
+        vertex_weights = hg.linearize_vertex_weights(self._image, graph)
+
+        tree, alt = hg.quasi_flat_zone_hierarchy(graph, edge_weights)
+
+        min_value = hg.accumulate_sequential(tree, vertex_weights, hg.Accumulators.min)
+        max_value = hg.accumulate_sequential(tree, vertex_weights, hg.Accumulators.max)
+        value_range = max_value - min_value
+
+        range_parents = value_range[tree.parents()]
+        violated_constraints = value_range >= range_parents
+        self._tree, node_map = hg.simplify_tree(tree, violated_constraints)
+        
         self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)
 

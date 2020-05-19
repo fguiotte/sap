@@ -11,6 +11,7 @@ install:
     - pip install .
   only:
     - branches
+    - merge_requests
 
 test:
   stage: quality
@@ -20,6 +21,7 @@ test:
     - pytest
   only:
     - branches
+    - merge_requests
 
 coverage:
   stage: quality
@@ -31,6 +33,7 @@ coverage:
   coverage: /\d+\%\s*$/
   only:
     - branches
+    - merge_requests
 
 doc:
   stage: quality
@@ -38,6 +41,7 @@ doc:
     - echo paper please
   only:
     - branches
+    - merge_requests
 
 deploy:
   stage: deploy

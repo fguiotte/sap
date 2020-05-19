@@ -547,15 +547,14 @@ class OmegaTree(Tree):
         display.
 
     """
-    def __init__(self, image, adjacency=4, image_name=None): #, weight_function='L2_squared'):         
+    def __init__(self, image, adjacency=4, image_name=None):
         super().__init__(image, adjacency, image_name, '(ω) filtering')
 
     def _construct(self):
-        graph = hg.get_4_adjacency_graph(self._image.shape)
-        edge_weights = hg.weight_graph(graph, self._image, getattr(hg.WeightFunction, 'L1'))
-        vertex_weights = hg.linearize_vertex_weights(self._image, graph)
+        edge_weights = hg.weight_graph(self._graph, self._image, getattr(hg.WeightFunction, 'L1'))
+        vertex_weights = hg.linearize_vertex_weights(self._image, self._graph)
 
-        tree, alt = hg.quasi_flat_zone_hierarchy(graph, edge_weights)
+        tree, alt = hg.quasi_flat_zone_hierarchy(self._graph, edge_weights)
 
         min_value = hg.accumulate_sequential(tree, vertex_weights, hg.Accumulators.min)
         max_value = hg.accumulate_sequential(tree, vertex_weights, hg.Accumulators.max)

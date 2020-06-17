@@ -985,5 +985,5 @@ def vectorize(profiles):
 
     """
 
-    return np.concatenate(profiles.data)
+    return np.concatenate([p.data for p in profiles])
 

@@ -32,6 +32,11 @@ def profiles_b(image):
     return sap.attribute_profiles(image, {'area': [1000, 10000],
                                           'height': [.1, .5]},
                                         image_name='image b')
+@pytest.fixture
+def profiles_c(image):
+    return sap.attribute_profiles(image, {'area': [1000, 10000]},
+                                        image_name='image c')
+
 def test_create_profiles_ndual(maxt):
     ps = sap.create_profiles(maxt, {'area': [10, 100, 1000]})
 
@@ -214,6 +219,13 @@ def test_profiles_iadd(profiles, profiles_b):
     assert (profiles_b[-1].data == np[-1].data).all(), 'Data do not correspond'
 
 def test_vectorize(profiles):
+    vectors = sap.vectorize(profiles)
+
+    assert len(vectors) == sum([len(x.data) for x in profiles]), 'Length of\
+    vectors mismatch'
+
+def test_vectorize_ap(profiles_c):
+    profiles = profiles_c
     vectors = sap.vectorize(profiles)
 
     assert len(vectors) == sum([len(x.data) for x in profiles]), 'Length of\

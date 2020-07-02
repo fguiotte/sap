@@ -49,3 +49,4 @@ Is equivalent to:
 
 from .trees import *
 from .profiles import *
+from .spectra import *

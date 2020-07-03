@@ -189,14 +189,14 @@ class Tree:
         return str(self.__repr__())
 
     def get_params(self):
-        return {'image_name': self._image_name, 
+        return {'image_name': self._image_name,
                 'image_hash': self._image_hash,
                 'adjacency': self._adjacency}
 
     def __repr__(self):
         if hasattr(self, '_tree'):
             rep = self.get_params()
-            rep.update({'num_nodes': self.num_nodes(), 
+            rep.update({'num_nodes': self.num_nodes(),
                     'image.shape': self._image.shape,
                     'image.dtype': self._image.dtype})
         else:
@@ -225,7 +225,7 @@ class Tree:
 
         See Also
         --------
-        get_attribute : Return the attribute values of the tree nodes.
+        Tree.get_attribute : Return the attribute values of the tree nodes.
 
         Notes
         -----
@@ -415,7 +415,7 @@ class MaxTree(Tree):
 
     Notes
     -----
-    Inherits all methods of `Tree` class.
+    Inherits all methods of :class:`Tree` class.
 
     """
     def __init__(self, image, adjacency=4, image_name=None):
@@ -508,7 +508,7 @@ class AlphaTree(Tree):
         'L1'.
 
     """
-    def __init__(self, image, adjacency=4, image_name=None, weight_function='L1'): 
+    def __init__(self, image, adjacency=4, image_name=None, weight_function='L1'):
         if isinstance(weight_function, str):
             try:
                 self._weight_function = getattr(hg.WeightFunction, weight_function)
@@ -563,6 +563,6 @@ class OmegaTree(Tree):
         range_parents = value_range[tree.parents()]
         violated_constraints = value_range >= range_parents
         self._tree, node_map = hg.simplify_tree(tree, violated_constraints)
-        
+
         self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)
 

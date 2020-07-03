@@ -21,7 +21,7 @@ Example
 Create the pattern spectrum (PS) of `image` with attributes area and
 compactness with the max-tree.
 
->>> max_tree = sap.MaxTree(image)
+>>> tree = sap.MaxTree(image)
 >>> ps = sap.spectrum2d(tree, 'area', 'compactness', x_log=True)
 >>> sap.show_spectrum(*ps)
 
@@ -51,7 +51,7 @@ def get_bins(x, count=10, space='lin', outliers=0.):
 
     Returns
     -------
-    bin_edges : ndarray
+    bin_edges : ndarray, shape(count + 1,)
         The edges defining the bins.
 
     See Also
@@ -79,7 +79,7 @@ def get_space(vmin, vmax, thresholds=10, space='lin'):
 
     Returns
     -------
-    samples : ndarray
+    samples : ndarray, shape(thresholds,)
         Spaced numbers over the range defined by vmin and vmax.
 
     See Also
@@ -130,23 +130,22 @@ def spectrum2d(tree, x_attribute, y_attribute, x_count=100, y_count=100,
         is ``False``.
     weighted : bool, optional
         If ``True``, the pattern spectrum is weighted. Each node of the
-        tree will be weighted according to its size, normalized with the
-        size of the image. This is the normal behaviour of pattern
-        spectrum. If ``False`` the spectrum is not weighted, the output
-        is a 2D histogram counting the number of nodes. Default is
-        ``True``.
+        tree will be weighted according to its size. This is the normal
+        behaviour of pattern spectrum. If ``False`` the spectrum is not
+        weighted, the output is a 2D histogram counting the number of
+        nodes. Default is ``True``.
     normalized : bool, optional
         If ``True``, the weights of the spectrum are normalized with the
-        size of the image. If ``False`` of ``weighted`` is ``False``,
+        size of the image. If ``False`` or ``weighted`` is ``False``,
         the spectrum is not normalized. Default is ``True``.
 
     Returns
     -------
     s : ndarray, shape(x_count, y_count)
         The pattern spectrum.
-    xedges : ndarray, shape(x_count + 1)
+    xedges : ndarray, shape(x_count + 1,)
         The bin edges along the x-axis.
-    yedges : ndarray, shape(y_count + 1)
+    yedges : ndarray, shape(y_count + 1,)
         The bin edges along the y-axis.
     x_log : bool
         The parameter x_log indicating if the x-axis is a log scale.

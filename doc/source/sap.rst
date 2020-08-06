@@ -10,7 +10,9 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
-   sap.trees
    sap.profiles
+   sap.spectra
+   sap.trees
    sap.utils

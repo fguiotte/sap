@@ -126,7 +126,7 @@ class Profiles:
 
     def diff(self):
         """Compute the differential of profiles.
-            
+
         Refer to :func:`differential` for full documentation.
 
         Returns
@@ -824,7 +824,7 @@ def differential(profiles):
     Parameters
     ----------
     profiles : Profiles
-        Attribute profiles or other profiles to process the 
+        Attribute profiles or other profiles to process the
         differential on.
 
     Returns
@@ -848,7 +848,7 @@ def differential(profiles):
 def local_features(profiles, local_feature=(np.mean, np.std), patch_size=7):
     """local_features(profiles, local_feature=(np.mean, np.std), patch_size=7)
     Compute the local features of profiles
-    
+
     Parameters
     ----------
     profiles : Profiles
@@ -868,10 +868,10 @@ def local_features(profiles, local_feature=(np.mean, np.std), patch_size=7):
         iter(local_feature)
     except TypeError:
         local_feature = (local_feature,)
-    
+
     new_data = []
     new_desc = []
-    
+
     for p in profiles:
         for f in local_feature:
             nd = [local_patch_f(d, patch_size, f) for d in p.data]

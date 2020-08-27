@@ -50,6 +50,7 @@ def ndarray_hash(x, l=8, c=1000):
 
     """
     rs = np.random.RandomState(42)
+    x = np.require(x, requirements='C')
     bt = np.frombuffer(x, np.uint8)
     ss = rs.choice(bt, int(l / 2) * c).reshape(-1, c).sum(1, np.uint8)
     return ''.join(['{:02x}'.format(x) for x in ss])

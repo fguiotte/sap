@@ -349,7 +349,8 @@ class Tree:
             deleted_nodes = np.zeros(self.num_nodes(), dtype=np.bool)
 
         feature_value = self._alt if feature == 'altitude' else \
-            self.get_attribute(feature)
+                        self.get_attribute(feature) if isinstance(feature, str) \
+                        else feature
 
         rules = {'direct': self._filtering_direct,
                  'min': self._filtering_min,

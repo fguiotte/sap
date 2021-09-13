@@ -96,11 +96,11 @@ def test_num_nodes(max_tree):
     assert max_tree.num_nodes() == 20000, 'Max tree did not returned correct number of nodes.'
 
 def test_reconstruct(max_tree, image):
-    deleted_nodes = np.zeros(max_tree.num_nodes(), dtype=np.bool)
+    deleted_nodes = np.zeros(max_tree.num_nodes(), dtype=bool)
     filtered_image = max_tree.reconstruct(deleted_nodes)
     assert (filtered_image == image).all(), 'Did not returned the same input image'
 
-    deleted_nodes = np.ones(max_tree.num_nodes(), dtype=np.bool)
+    deleted_nodes = np.ones(max_tree.num_nodes(), dtype=bool)
     filtered_image = max_tree.reconstruct(deleted_nodes)
     assert (filtered_image == 0).all(), 'Did not returned the filtered image'
 

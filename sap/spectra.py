@@ -163,8 +163,11 @@ def spectrum2d(tree, x_attribute, y_attribute, x_count=100, y_count=100,
     bins = (get_bins(x, x_count, 'geo' if x_log else 'lin'),
             get_bins(y, y_count, 'geo' if y_log else 'lin'))
 
-    weights = tree.get_attribute('area') if weighted else None
-    weights = weights / tree._image.size if normalized and weighted else weights
+    weights = tree.get_attribute('area') * tree.get_attribute('height') if weighted else None
+
+    #weights = weights / tree._image.size if normalized and weighted else weights
+    #weights = weights / weights.max() if normalized and weighted else weights
+    weights = weights / weights.sum() if normalized and weighted else weights
 
     s, xedges, yedges = np.histogram2d(x, y, bins=bins, density=None, weights=weights)
 

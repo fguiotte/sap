@@ -346,10 +346,11 @@ class Tree:
         if isinstance(deleted_nodes, bool):
             deleted_nodes = np.array((deleted_nodes,) * self.num_nodes())
         elif deleted_nodes is None:
-            deleted_nodes = np.zeros(self.num_nodes(), dtype=np.bool)
+            deleted_nodes = np.zeros(self.num_nodes(), dtype=bool)
 
         feature_value = self._alt if feature == 'altitude' else \
-            self.get_attribute(feature)
+                        self.get_attribute(feature) if isinstance(feature, str) \
+                        else feature
 
         rules = {'direct': self._filtering_direct,
                  'min': self._filtering_min,
@@ -361,22 +362,22 @@ class Tree:
         return hg.reconstruct_leaf_data(self._tree, feature_value, deleted_nodes)
 
     def _filtering_direct(self, feature_value, direct):
-        deleted_nodes = direct.astype(np.bool)
+        deleted_nodes = direct.astype(bool)
         return feature_value, deleted_nodes
 
     def _filtering_min(self, feature_value, direct):
         deleted_nodes = hg.propagate_sequential(self._tree, direct,
-                ~direct).astype(np.bool)
+                ~direct).astype(bool)
         return feature_value, deleted_nodes
 
     def _filtering_max(self, feature_value, direct):
         deleted_nodes = hg.accumulate_and_min_sequential(self._tree, direct,
                     np.ones(self._tree.num_leaves()),
-                    hg.Accumulators.min).astype(np.bool)
+                    hg.Accumulators.min).astype(bool)
         return feature_value, deleted_nodes
 
     def _filtering_subtractive(self, feature_value, direct):
-        deleted_nodes = direct.astype(np.bool)
+        deleted_nodes = direct.astype(bool)
         delta = feature_value - feature_value[self._tree.parents()]
         delta[direct] = 0
         delta[self._tree.root()] = feature_value[self._tree.root()]

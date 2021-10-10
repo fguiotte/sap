@@ -641,6 +641,57 @@ def omega_profiles(image, attribute, adjacency=4,
     otree = trees.OmegaTree(image, adjacency, image_name)
     return create_profiles(otree, attribute, 'altitude', filtering_rule, 'omega profiles')
 
+def watershed_profiles(image, markers, attribute, adjacency=4, image_name=None, filtering_rule='direct', weight_function = 'L1', watershed_attribute='area'):
+    """
+    Compute the watershed profiles of an image.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image
+    markers : 2D ndarray of same dimension as 'image'  
+        Prior-knowledge to be combined to the image gradient before the construction of the hierarchical watershed.
+        If 'markers' is an ndarray of ones, the result will be equivalent of not using markers at all.
+    attribute : dict
+        Dictionary of attribute (as key, str) with according thresholds
+        (as values, number).
+    adjacency : int
+        Adjacency used for the tree construction. Default is 4.
+    image_name : str
+        The name of the image (optional). Useful to track filtering
+        process and display. If not set, the name is replaced by the
+        hash of the image.
+    filtering_rule: str, optional
+        The filtering rule to use. It can be 'direct', 'min', 'max' or
+        'subtractive'. Default is 'direct'.
+    weight_function : str
+        The function used to compute dissimilarity between neighbour pixels. Default is 'L1' (absolute different between pixel values).
+    watershed_attribute : str
+        The criteria used to guide the contruction of the hierarchical watershed. The allowed criteria are : 'area', 'volume', 'dynamics' and 'parents'.
+
+    Examples
+    --------
+
+    >>> image = np.arange(5 * 5).reshape(5, 5)
+    >>> markers = np.ones((5,5))
+    >>> sap.watershed_profiles(image, markers, {'area': [10, 100]})
+    Profiles{'attribute': 'area',
+     'filtering rule': 'direct',
+     'name': 'watershed profiles',
+     'out feature': 'altitude',
+     'profiles': [{'operation': 'copy feature altitude'},
+                  {'operation': 'watershed filtering', 'threshold': 10},
+                  {'operation': 'watershed filtering', 'threshold': 100}],
+     'tree': {'adjacency': 4, 'image_hash': '44f17c0f', 'image_name': None}}
+
+    See Also
+    --------
+    sap.trees.available_attributes : List available attributes.
+
+    """
+    atree = trees.WatershedTree(image, markers, adjacency, image_name, weight_function, watershed_attribute)
+    return create_profiles(atree, attribute, 'altitude', filtering_rule, 'watershed profiles')
+
 def _show_profiles(profiles, height=None, fname=None, **kwargs):
     assert len(profiles) == 1, 'Show profile only for one attribute at a time.'
 

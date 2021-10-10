@@ -567,3 +567,66 @@ class OmegaTree(Tree):
 
         self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)
 
+class WatershedTree(Tree):
+    """
+    Construct a hierarchical watershed from the gradient of the input image.
+
+    Parameters
+    ----------
+    image : 2D ndarray
+        The image from which the gradient (an edge-weighted graph) is constructed.
+    markers : 2D ndarray of same dimension as 'image'  
+        Prior-knowledge to be combined to the image gradient before the construction of the hierarchical watershed. The method is described in :
+            Maia, Deise Santana, Minh-Tan Pham, and Sébastien Lefèvre. "Watershed-based attribute profiles for pixel 
+            classification of remote sensing data." International Conference on Discrete Geometry and Mathematical Morphology. Springer, Cham, 2021.     
+        We expect the 'markers' to be a gray-scale image in which dark and homogeneous regions have the highest probability of belonging to
+        the same catchment basins.
+        If 'markers' is an ndarray of ones, the result will be equivalent of not using markers at all.
+    adjacency : int
+        The pixel connectivity used to compute edge-weighted graph which represents the image gradient.
+        The allowed adjacency are 4 or 8. Default is 4.
+    image_name : str, optional
+        The name of the image.
+    weight_function : str
+        The function used to compute dissimilarity between neighbour pixels. Default is 'L1' (absolute different between pixel values).
+    watershed_attribute : str
+        The criteria used to guide the contruction of the hierarchical watershed. The allowed criteria are : 'area', 'volume', 'dynamics' and 'parents'.
+    """
+    def __init__(self, image, markers, adjacency=4, image_name=None, weight_function='L1', watershed_attribute='area'):
+        if isinstance(watershed_attribute, str):
+            try:
+                self._watershed_attribute = watershed_attribute
+                func = getattr(hg, 'attribute_' + watershed_attribute)
+            except AttributeError:
+                raise ValueError('Wrong attribute or out feature: \'{}\'')
+        if isinstance(weight_function, str):
+            try:
+                self._weight_function = getattr(hg.WeightFunction, weight_function)
+            except AttributeError:
+                raise AttributeError('Wrong value \'{}\' for attribute' \
+                ' weight_function'.format(weight_function))
+        elif isinstance(weight_function, hg.higram.WeightFunction):
+            self._weight_function = weight_function
+        else:
+            raise NotImplementedError('Unknow type \'{}\' for parameter' \
+                    ' weight_function'.format(type(weight_function)))
+
+        self._markers = markers
+        super().__init__(image, adjacency, image_name, 'watershed filtering')
+
+    def _construct(self):
+        markers_gradient = hg.weight_graph(self._graph, self._markers, hg.WeightFunction.max) 
+        weight = hg.weight_graph(self._graph, self._image, self._weight_function)       
+        weight = weight*markers_gradient
+
+        if (self._watershed_attribute == "area"):
+             self._tree, alt = hg.watershed_hierarchy_by_area(self._graph, weight)
+        if (self._watershed_attribute == "dynamics"):
+             self._tree, alt = hg.watershed_hierarchy_by_dynamics(self._graph, weight)
+        if (self._watershed_attribute == "volume"):
+             self._tree, alt = hg.watershed_hierarchy_by_volume(self._graph, weight)
+        if (self._watershed_attribute == "parents"):
+             self._tree, alt = hg.watershed_hierarchy_by_number_of_parents(self._graph, weight)   
+        
+        # Node represented by the average gray level inside a node
+        self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)

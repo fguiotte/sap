@@ -576,21 +576,41 @@ class WatershedTree(Tree):
     image : 2D ndarray
         The image from which the gradient (an edge-weighted graph) is constructed.
     markers : 2D ndarray of same dimension as 'image'  
-        Prior-knowledge to be combined to the image gradient before the construction of the hierarchical watershed. The method is described in :
-            Maia, Deise Santana, Minh-Tan Pham, and Sébastien Lefèvre. "Watershed-based attribute profiles for pixel 
-            classification of remote sensing data." International Conference on Discrete Geometry and Mathematical Morphology. Springer, Cham, 2021.     
-        We expect the 'markers' to be a gray-scale image in which dark and homogeneous regions have the highest probability of belonging to
-        the same catchment basins.
-        If 'markers' is an ndarray of ones, the result will be equivalent of not using markers at all.
+        Prior-knowledge to be combined to the image gradient before the
+        construction of the hierarchical watershed. See notes.
     adjacency : int
-        The pixel connectivity used to compute edge-weighted graph which represents the image gradient.
-        The allowed adjacency are 4 or 8. Default is 4.
+        The pixel connectivity used to compute edge-weighted graph which
+        represents the image gradient. The allowed adjacency are 4 or 8.
+        Default is 4.
     image_name : str, optional
         The name of the image.
     weight_function : str
-        The function used to compute dissimilarity between neighbour pixels. Default is 'L1' (absolute different between pixel values).
+        The function used to compute dissimilarity between neighbour
+        pixels. Default is 'L1' (absolute different between pixel
+        values).
     watershed_attribute : str
-        The criteria used to guide the contruction of the hierarchical watershed. The allowed criteria are : 'area', 'volume', 'dynamics' and 'parents'.
+        The criteria used to guide the construction of the hierarchical
+        watershed. The allowed criteria are : 'area', 'volume',
+        'dynamics' and 'parents'.
+
+    Notes
+    -----
+    The :attr:`markers` parameter is prior-knowledge to be combined to
+    the image gradient before the construction of the hierarchical
+    watershed. The method is described in :
+
+        Maia, Deise Santana, Minh-Tan Pham, and Sébastien Lefèvre.
+        "Watershed-based attribute profiles for pixel classification of remote sensing data."
+        International Conference on Discrete Geometry and Mathematical Morphology.
+        Springer, Cham, 2021.
+        `doi:10.1007/978-3-030-76657-3_8 <https://doi.org/10.1007/978-3-030-76657-3_8>`_
+
+    We expect the markers to be a gray-scale image in which dark and
+    homogeneous regions have the highest probability of belonging to the
+    same catchment basins.  If :attr:'markers' is an ndarray of ones,
+    the result will be equivalent of not using markers at all.
+
+
     """
     def __init__(self, image, markers, adjacency=4, image_name=None, weight_function='L1', watershed_attribute='area'):
         if isinstance(watershed_attribute, str):

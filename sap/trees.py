@@ -618,7 +618,8 @@ class WatershedTree(Tree):
                 self._watershed_attribute = watershed_attribute
                 func = getattr(hg, 'attribute_' + watershed_attribute)
             except AttributeError:
-                raise ValueError('Wrong attribute or out feature: \'{}\'')
+                raise ValueError(f'Wrong attribute or out feature: \'{watershed_attribute}\'')
+        ## TODO: Missing else not str, or remove isinstance str test?
         if isinstance(weight_function, str):
             try:
                 self._weight_function = getattr(hg.WeightFunction, weight_function)

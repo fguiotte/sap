@@ -53,6 +53,11 @@ def test_AlphaTree_constructor(image):
 def test_OmegaTree_constructor(image):
     t = sap.OmegaTree(image)
 
+@pytest.mark.parametrize('watershed_attribute', ['area', 'dynamics', 'volume', 'parents'])
+def test_WatershedTree_constructor(image, watershed_attribute):
+    markers = np.ones_like(image)
+    t = sap.WatershedTree(image, markers, watershed_attribute=watershed_attribute)
+
 def test_AlphaTree_exception(image):
     with pytest.raises(AttributeError):
         sap.AlphaTree(image, weight_function='L42')

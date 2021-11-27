@@ -600,10 +600,9 @@ class WatershedTree(Tree):
     watershed. The method is described in :
 
         Maia, Deise Santana, Minh-Tan Pham, and Sébastien Lefèvre.
-        "Watershed-based attribute profiles for pixel classification of remote sensing data."
+        `Watershed-based attribute profiles for pixel classification of remote sensing data <https://hal.archives-ouvertes.fr/hal-03199313>`_.
         International Conference on Discrete Geometry and Mathematical Morphology.
         Springer, Cham, 2021.
-        `doi:10.1007/978-3-030-76657-3_8 <https://doi.org/10.1007/978-3-030-76657-3_8>`_
 
     We expect the markers to be a gray-scale image in which dark and
     homogeneous regions have the highest probability of belonging to the
@@ -648,6 +647,11 @@ class WatershedTree(Tree):
              self._tree, alt = hg.watershed_hierarchy_by_volume(self._graph, weight)
         if (self._watershed_attribute == "parents"):
              self._tree, alt = hg.watershed_hierarchy_by_number_of_parents(self._graph, weight)   
+        # TODO: From higra docs
+        # Calling watershed_hierarchy_by_area is equivalent to:
+        # tree = watershed_hierarchy_by_attribute(graph, edge_weights, lambda tree, _: hg.attribute_area(tree))
+
+
         
         # Node represented by the average gray level inside a node
         self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)

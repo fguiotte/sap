@@ -1,7 +1,7 @@
 # Simple Attribute Profiles (SAP)
 
 
-[![build status](https://gitlab.inria.fr/fguiotte/sap/badges/master/pipeline.svg)](https://gitlab.inria.fr/fguiotte/sap/pipelines/latest)
+[![build status](https://github.com/fguiotte/sap/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/fguiotte/sap/actions/workflows/main.yml)
 [![coverage report](https://gitlab.inria.fr/fguiotte/sap/badges/master/coverage.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/master)
 [![Documentation Status](https://readthedocs.org/projects/python-sap/badge/?version=master)](https://python-sap.readthedocs.io/en/master)
 [![Pypi version](https://img.shields.io/pypi/v/sap.svg)](https://pypi.org/project/sap/)
@@ -43,6 +43,6 @@ plt.show()
 
 ## Develop status
 
-[![build status](https://gitlab.inria.fr/fguiotte/sap/badges/develop/pipeline.svg)](https://gitlab.inria.fr/fguiotte/sap/pipelines?scope=branches)
+[![build status](https://github.com/fguiotte/sap/actions/workflows/main.yml/badge.svg?branch=develop)](https://github.com/fguiotte/sap/actions/workflows/main.yml)
 [![coverage report](https://gitlab.inria.fr/fguiotte/sap/badges/develop/coverage.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/develop)
 [![Documentation Status](https://readthedocs.org/projects/python-sap/badge/?version=develop)](https://python-sap.readthedocs.io/en/develop)

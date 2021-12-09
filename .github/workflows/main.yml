@@ -17,7 +17,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  tests-and-coverage:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -27,11 +27,18 @@ jobs:
       - uses: actions/checkout@v2
 
       # Runs a single command using the runners shell
-      - name: Install
+      - name: setup dependencies
+        run: |
+          pip install pytest-cov
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          chmod +x codecov
+
+      - name: install sap
         run: pip install .
         
       # Runs a set of commands using the runners shell
-      - name: Test
-        run: |
-          pip install pytest-cov
-          pytest --cov sap --cov-fail-under 50 --cov-report term-missing
+      - name: test and coverage
+        run: pytest --cov sap --cov-fail-under 50 --cov-report term-missing --cov-report xml
+
+      - name: upload coverage to codecov
+        run: ./codecov -t ${CODECOV_TOKEN}

@@ -1,10 +1,11 @@
 # Simple Attribute Profiles (SAP)
 
 
-[![build status](https://gitlab.inria.fr/fguiotte/sap/badges/master/pipeline.svg)](https://gitlab.inria.fr/fguiotte/sap/pipelines/latest)
-[![coverage report](https://gitlab.inria.fr/fguiotte/sap/badges/master/coverage.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/master)
-[![Documentation Status](https://readthedocs.org/projects/python-sap/badge/?version=master)](https://python-sap.readthedocs.io/en/master)
+[![build status](https://github.com/fguiotte/sap/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/fguiotte/sap/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/fguiotte/sap/branch/master/graph/badge.svg?token=D8VCLKNAYW)](https://codecov.io/gh/fguiotte/sap)
+[![Documentation Status](https://img.shields.io/readthedocs/python-sap/master)](https://python-sap.readthedocs.io/en/master)
 [![Pypi version](https://img.shields.io/pypi/v/sap.svg)](https://pypi.org/project/sap/)
+[![Pypi python](https://img.shields.io/pypi/pyversions/sap)](https://pypi.org/project/sap/)
 
 
 SAP is a Python package to easily compute morphological attribute
@@ -43,6 +44,6 @@ plt.show()
 
 ## Develop status
 
-[![build status](https://gitlab.inria.fr/fguiotte/sap/badges/develop/pipeline.svg)](https://gitlab.inria.fr/fguiotte/sap/pipelines?scope=branches)
-[![coverage report](https://gitlab.inria.fr/fguiotte/sap/badges/develop/coverage.svg)](https://gitlab.inria.fr/fguiotte/sap/commits/develop)
-[![Documentation Status](https://readthedocs.org/projects/python-sap/badge/?version=develop)](https://python-sap.readthedocs.io/en/develop)
+[![build status](https://github.com/fguiotte/sap/actions/workflows/main.yml/badge.svg?branch=develop)](https://github.com/fguiotte/sap/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/fguiotte/sap/branch/develop/graph/badge.svg?token=D8VCLKNAYW)](https://codecov.io/gh/fguiotte/sap)
+[![Documentation Status](https://img.shields.io/readthedocs/python-sap/develop)](https://python-sap.readthedocs.io/en/develop)

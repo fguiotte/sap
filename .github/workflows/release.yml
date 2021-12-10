@@ -11,14 +11,15 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Get version number
-        run: echo ::set-output name=setup_version::python setup.py --version
+        run: echo "::set-output name=setup_version::python setup.py --version"
+        id: get-version
 
       - name: Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{ steps.vars.outputs.pr_body }}
+          custom_tag: ${{ steps.get-version.outputs.setup_version }}
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1

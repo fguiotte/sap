@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Get version number
-        run: echo "::set-output name=setup_version::python setup.py --version"
+        run: echo "::set-output name=setup_version::$(python setup.py --version)"
         id: get-version
 
       - name: Bump version and push tag

@@ -612,46 +612,41 @@ class WatershedTree(Tree):
 
     """
     def __init__(self, image, markers, adjacency=4, image_name=None, weight_function='L1', watershed_attribute='area'):
-        if isinstance(watershed_attribute, str):
-            try:
-                self._watershed_attribute = watershed_attribute
-                func = getattr(hg, 'attribute_' + watershed_attribute)
-            except AttributeError:
-                raise ValueError(f'Wrong attribute or out feature: \'{watershed_attribute}\'')
-        ## TODO: Missing else not str, or remove isinstance str test?
+        self._watershed_attribute = watershed_attribute
+
         if isinstance(weight_function, str):
             try:
                 self._weight_function = getattr(hg.WeightFunction, weight_function)
             except AttributeError:
-                raise AttributeError('Wrong value \'{}\' for attribute' \
+                raise AttributeError('Wrong value \'{}\' for attribute'
                 ' weight_function'.format(weight_function))
+
         elif isinstance(weight_function, hg.higram.WeightFunction):
             self._weight_function = weight_function
         else:
-            raise NotImplementedError('Unknow type \'{}\' for parameter' \
+            raise NotImplementedError(
+                    'Unknow type \'{}\' for parameter'
                     ' weight_function'.format(type(weight_function)))
 
         self._markers = markers
         super().__init__(image, adjacency, image_name, 'watershed filtering')
 
     def _construct(self):
-        markers_gradient = hg.weight_graph(self._graph, self._markers, hg.WeightFunction.max) 
-        weight = hg.weight_graph(self._graph, self._image, self._weight_function)       
-        weight = weight*markers_gradient
+        markers_gradient = hg.weight_graph(self._graph, self._markers, hg.WeightFunction.max)
+        weight = hg.weight_graph(self._graph, self._image, self._weight_function)
+        weight = weight * markers_gradient
 
         if (self._watershed_attribute == "area"):
-             self._tree, alt = hg.watershed_hierarchy_by_area(self._graph, weight)
+            self._tree, alt = hg.watershed_hierarchy_by_area(self._graph, weight)
         if (self._watershed_attribute == "dynamics"):
-             self._tree, alt = hg.watershed_hierarchy_by_dynamics(self._graph, weight)
+            self._tree, alt = hg.watershed_hierarchy_by_dynamics(self._graph, weight)
         if (self._watershed_attribute == "volume"):
-             self._tree, alt = hg.watershed_hierarchy_by_volume(self._graph, weight)
+            self._tree, alt = hg.watershed_hierarchy_by_volume(self._graph, weight)
         if (self._watershed_attribute == "parents"):
-             self._tree, alt = hg.watershed_hierarchy_by_number_of_parents(self._graph, weight)   
+            self._tree, alt = hg.watershed_hierarchy_by_number_of_parents(self._graph, weight)
         # TODO: From higra docs
         # Calling watershed_hierarchy_by_area is equivalent to:
         # tree = watershed_hierarchy_by_attribute(graph, edge_weights, lambda tree, _: hg.attribute_area(tree))
 
-
-        
         # Node represented by the average gray level inside a node
         self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)

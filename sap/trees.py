@@ -606,12 +606,12 @@ class WatershedTree(Tree):
 
     We expect the markers to be a gray-scale image in which dark and
     homogeneous regions have the highest probability of belonging to the
-    same catchment basins.  If :attr:'markers' is an ndarray of ones,
-    the result will be equivalent of not using markers at all.
-
+    same catchment basins.  If :attr:'markers' is ``None``, it is
+    replaced by an ndarray of ones, the result will be equivalent of not
+    using markers at all.
 
     """
-    def __init__(self, image, markers, adjacency=4, image_name=None, weight_function='L1', watershed_attribute='area'):
+    def __init__(self, image, markers=None, adjacency=4, image_name=None, weight_function='L1', watershed_attribute='area'):
         self._watershed_attribute = watershed_attribute
 
         if isinstance(weight_function, str):
@@ -628,7 +628,7 @@ class WatershedTree(Tree):
                     'Unknow type \'{}\' for parameter'
                     ' weight_function'.format(type(weight_function)))
 
-        self._markers = markers
+        self._markers = np.ones_like(image) if markers is None else markers
         super().__init__(image, adjacency, image_name, 'watershed filtering')
 
     def _construct(self):

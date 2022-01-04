@@ -641,7 +641,7 @@ def omega_profiles(image, attribute, adjacency=4,
     otree = trees.OmegaTree(image, adjacency, image_name)
     return create_profiles(otree, attribute, 'altitude', filtering_rule, 'omega profiles')
 
-def watershed_profiles(image, markers, attribute, adjacency=4, image_name=None, filtering_rule='direct', weight_function = 'L1', watershed_attribute='area'):
+def watershed_profiles(image, attribute, markers=None, adjacency=4, image_name=None, filtering_rule='direct', weight_function = 'L1', watershed_attribute='area'):
     """
     Compute the watershed profiles of an image.
 
@@ -649,12 +649,14 @@ def watershed_profiles(image, markers, attribute, adjacency=4, image_name=None, 
     ----------
     image : ndarray
         The image
-    markers : 2D ndarray of same dimension as 'image'  
-        Prior-knowledge to be combined to the image gradient before the construction of the hierarchical watershed.
-        If 'markers' is an ndarray of ones, the result will be equivalent of not using markers at all.
     attribute : dict
         Dictionary of attribute (as key, str) with according thresholds
         (as values, number).
+    markers : 2D ndarray of same dimension as 'image'  
+        Prior-knowledge to be combined to the image gradient before the
+        construction of the hierarchical watershed.  If :attr:'markers'
+        is ``None``, an ndarray of ones is used, the result will be
+        equivalent of not using markers at all.
     adjacency : int
         Adjacency used for the tree construction. Default is 4.
     image_name : str
@@ -665,9 +667,13 @@ def watershed_profiles(image, markers, attribute, adjacency=4, image_name=None, 
         The filtering rule to use. It can be 'direct', 'min', 'max' or
         'subtractive'. Default is 'direct'.
     weight_function : str
-        The function used to compute dissimilarity between neighbour pixels. Default is 'L1' (absolute different between pixel values).
+        The function used to compute dissimilarity between neighbour
+        pixels. Default is 'L1' (absolute different between pixel
+        values).
     watershed_attribute : str
-        The criteria used to guide the contruction of the hierarchical watershed. The allowed criteria are : 'area', 'volume', 'dynamics' and 'parents'.
+        The criteria used to guide the contruction of the hierarchical
+        watershed. The allowed criteria are : 'area', 'volume',
+        'dynamics' and 'parents'.
 
     Examples
     --------

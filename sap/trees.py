@@ -662,20 +662,8 @@ class WatershedTree(Tree):
                 'parents': hg.watershed_hierarchy_by_number_of_parents,
             }
 
-        #self._tree, alt = ws_hierachies[self._watershed_attribute](
-        #        self._graph, weight)
-        if self._watershed_attribute == 'parents':
-            self._tree, alt = ws_hierachies[self._watershed_attribute](
+        self._tree, alt = ws_hierachies[self._watershed_attribute](
                 self._graph, weight)
-        else:
-            self._tree, alt = hg.watershed_hierarchy_by_attribute(
-                    self._graph, 
-                    weight,
-                    lambda tree, _: self._get_higra_attribute_func_with_default(self._watershed_attribute)(tree))
-
-        # TODO: From higra docs
-        # Calling watershed_hierarchy_by_area is equivalent to:
-        # tree = watershed_hierarchy_by_attribute(graph, edge_weights, lambda tree, _: hg.attribute_area(tree))
 
         # Node represented by the average gray level inside a node
         self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)

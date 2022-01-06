@@ -634,16 +634,18 @@ class WatershedTree(Tree):
     def _construct(self):
         markers_gradient = hg.weight_graph(self._graph, self._markers, hg.WeightFunction.max)
         weight = hg.weight_graph(self._graph, self._image, self._weight_function)
-        weight = weight * markers_gradient
+        weight *= markers_gradient
 
-        if (self._watershed_attribute == "area"):
-            self._tree, alt = hg.watershed_hierarchy_by_area(self._graph, weight)
-        if (self._watershed_attribute == "dynamics"):
-            self._tree, alt = hg.watershed_hierarchy_by_dynamics(self._graph, weight)
-        if (self._watershed_attribute == "volume"):
-            self._tree, alt = hg.watershed_hierarchy_by_volume(self._graph, weight)
-        if (self._watershed_attribute == "parents"):
-            self._tree, alt = hg.watershed_hierarchy_by_number_of_parents(self._graph, weight)
+        ws_hierachies = {
+                'area': hg.watershed_hierarchy_by_area,
+                'dynamics': hg.watershed_hierarchy_by_dynamics,
+                'volume': hg.watershed_hierarchy_by_volume,
+                'parents': hg.watershed_hierarchy_by_number_of_parents,
+            }
+
+        self._tree, alt = ws_hierachies[self._watershed_attribute](
+                self._graph, weight)
+
         # TODO: From higra docs
         # Calling watershed_hierarchy_by_area is equivalent to:
         # tree = watershed_hierarchy_by_attribute(graph, edge_weights, lambda tree, _: hg.attribute_area(tree))

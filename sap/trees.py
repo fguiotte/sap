@@ -22,12 +22,15 @@ less than 100 pixels:
 
 """
 
-import higra as hg
-import numpy as np
-from pprint import pformat
 import inspect
-import tempfile
 from pathlib import Path
+import tempfile
+from pprint import pformat
+import functools
+
+import numpy as np
+import higra as hg
+
 from .utils import *
 
 def available_attributes():
@@ -246,6 +249,31 @@ class Tree:
         """
         return available_attributes()
 
+    def _get_higra_attribute_func(self, attribute_name):
+        try:
+            attribute_func = getattr(hg, 'attribute_' + attribute_name)
+        except AttributeError:
+            raise ValueError(f'Wrong attribute or out feature: \'{attribute_name}\'')
+
+        return attribute_func
+
+    def _set_params_on_higra_attribute_func(self, attribute_func):
+        kwargs = {}
+
+        if 'altitudes' in inspect.signature(attribute_func).parameters:
+            kwargs['altitudes'] = kwargs.get('altitudes', self._alt)
+
+        if 'vertex_weights' in inspect.signature(attribute_func).parameters:
+            kwargs['vertex_weights'] = kwargs.get('vertex_weights', self._image)
+        return functools.partial(attribute_func, **kwargs)
+
+    def _get_higra_attribute_func_with_default(self, attribute_name):
+        attribute_func = self._get_higra_attribute_func(attribute_name)
+        attribute_func = self._set_params_on_higra_attribute_func(attribute_func)
+
+        return attribute_func
+
+
     def get_attribute(self, attribute_name, **kwargs):
         """
         Get attribute values of the tree nodes.
@@ -284,16 +312,7 @@ class Tree:
         array([   1.,    1.,    1., ...,  998.,  999., 1000.])
 
         """
-        try:
-            compute = getattr(hg, 'attribute_' + attribute_name)
-        except AttributeError:
-            raise ValueError('Wrong attribute or out feature: \'{}\'')
-
-        if 'altitudes' in inspect.signature(compute).parameters:
-            kwargs['altitudes'] = kwargs.get('altitudes', self._alt)
-
-        if 'vertex_weights' in inspect.signature(compute).parameters:
-            kwargs['vertex_weights'] = kwargs.get('vertex_weights', self._image)
+        compute = self._get_higra_attribute_func_with_default(attribute_name)
 
         return compute(self._tree, **kwargs)
 
@@ -643,8 +662,16 @@ class WatershedTree(Tree):
                 'parents': hg.watershed_hierarchy_by_number_of_parents,
             }
 
-        self._tree, alt = ws_hierachies[self._watershed_attribute](
+        #self._tree, alt = ws_hierachies[self._watershed_attribute](
+        #        self._graph, weight)
+        if self._watershed_attribute == 'parents':
+            self._tree, alt = ws_hierachies[self._watershed_attribute](
                 self._graph, weight)
+        else:
+            self._tree, alt = hg.watershed_hierarchy_by_attribute(
+                    self._graph, 
+                    weight,
+                    lambda tree, _: self._get_higra_attribute_func_with_default(self._watershed_attribute)(tree))
 
         # TODO: From higra docs
         # Calling watershed_hierarchy_by_area is equivalent to:

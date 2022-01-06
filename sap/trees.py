@@ -22,12 +22,15 @@ less than 100 pixels:
 
 """
 
-import higra as hg
-import numpy as np
-from pprint import pformat
 import inspect
-import tempfile
 from pathlib import Path
+import tempfile
+from pprint import pformat
+import functools
+
+import numpy as np
+import higra as hg
+
 from .utils import *
 
 def available_attributes():
@@ -246,6 +249,31 @@ class Tree:
         """
         return available_attributes()
 
+    def _get_higra_attribute_func(self, attribute_name):
+        try:
+            attribute_func = getattr(hg, 'attribute_' + attribute_name)
+        except AttributeError:
+            raise ValueError(f'Wrong attribute or out feature: \'{attribute_name}\'')
+
+        return attribute_func
+
+    def _set_params_on_higra_attribute_func(self, attribute_func):
+        kwargs = {}
+
+        if 'altitudes' in inspect.signature(attribute_func).parameters:
+            kwargs['altitudes'] = kwargs.get('altitudes', self._alt)
+
+        if 'vertex_weights' in inspect.signature(attribute_func).parameters:
+            kwargs['vertex_weights'] = kwargs.get('vertex_weights', self._image)
+        return functools.partial(attribute_func, **kwargs)
+
+    def _get_higra_attribute_func_with_default(self, attribute_name):
+        attribute_func = self._get_higra_attribute_func(attribute_name)
+        attribute_func = self._set_params_on_higra_attribute_func(attribute_func)
+
+        return attribute_func
+
+
     def get_attribute(self, attribute_name, **kwargs):
         """
         Get attribute values of the tree nodes.
@@ -284,16 +312,7 @@ class Tree:
         array([   1.,    1.,    1., ...,  998.,  999., 1000.])
 
         """
-        try:
-            compute = getattr(hg, 'attribute_' + attribute_name)
-        except AttributeError:
-            raise ValueError('Wrong attribute or out feature: \'{}\'')
-
-        if 'altitudes' in inspect.signature(compute).parameters:
-            kwargs['altitudes'] = kwargs.get('altitudes', self._alt)
-
-        if 'vertex_weights' in inspect.signature(compute).parameters:
-            kwargs['vertex_weights'] = kwargs.get('vertex_weights', self._image)
+        compute = self._get_higra_attribute_func_with_default(attribute_name)
 
         return compute(self._tree, **kwargs)
 
@@ -606,52 +625,45 @@ class WatershedTree(Tree):
 
     We expect the markers to be a gray-scale image in which dark and
     homogeneous regions have the highest probability of belonging to the
-    same catchment basins.  If :attr:'markers' is an ndarray of ones,
-    the result will be equivalent of not using markers at all.
-
+    same catchment basins.  If :attr:`markers` is ``None``, it is
+    replaced by an ndarray of ones, the result will be equivalent of not
+    using markers at all.
 
     """
-    def __init__(self, image, markers, adjacency=4, image_name=None, weight_function='L1', watershed_attribute='area'):
-        if isinstance(watershed_attribute, str):
-            try:
-                self._watershed_attribute = watershed_attribute
-                func = getattr(hg, 'attribute_' + watershed_attribute)
-            except AttributeError:
-                raise ValueError(f'Wrong attribute or out feature: \'{watershed_attribute}\'')
-        ## TODO: Missing else not str, or remove isinstance str test?
+    def __init__(self, image, markers=None, adjacency=4, image_name=None, weight_function='L1', watershed_attribute='area'):
+        self._watershed_attribute = watershed_attribute
+
         if isinstance(weight_function, str):
             try:
                 self._weight_function = getattr(hg.WeightFunction, weight_function)
             except AttributeError:
-                raise AttributeError('Wrong value \'{}\' for attribute' \
+                raise AttributeError('Wrong value \'{}\' for attribute'
                 ' weight_function'.format(weight_function))
+
         elif isinstance(weight_function, hg.higram.WeightFunction):
             self._weight_function = weight_function
         else:
-            raise NotImplementedError('Unknow type \'{}\' for parameter' \
+            raise NotImplementedError(
+                    'Unknow type \'{}\' for parameter'
                     ' weight_function'.format(type(weight_function)))
 
-        self._markers = markers
+        self._markers = np.ones_like(image) if markers is None else markers
         super().__init__(image, adjacency, image_name, 'watershed filtering')
 
     def _construct(self):
-        markers_gradient = hg.weight_graph(self._graph, self._markers, hg.WeightFunction.max) 
-        weight = hg.weight_graph(self._graph, self._image, self._weight_function)       
-        weight = weight*markers_gradient
+        markers_gradient = hg.weight_graph(self._graph, self._markers, hg.WeightFunction.max)
+        weight = hg.weight_graph(self._graph, self._image, self._weight_function)
+        weight *= markers_gradient
 
-        if (self._watershed_attribute == "area"):
-             self._tree, alt = hg.watershed_hierarchy_by_area(self._graph, weight)
-        if (self._watershed_attribute == "dynamics"):
-             self._tree, alt = hg.watershed_hierarchy_by_dynamics(self._graph, weight)
-        if (self._watershed_attribute == "volume"):
-             self._tree, alt = hg.watershed_hierarchy_by_volume(self._graph, weight)
-        if (self._watershed_attribute == "parents"):
-             self._tree, alt = hg.watershed_hierarchy_by_number_of_parents(self._graph, weight)   
-        # TODO: From higra docs
-        # Calling watershed_hierarchy_by_area is equivalent to:
-        # tree = watershed_hierarchy_by_attribute(graph, edge_weights, lambda tree, _: hg.attribute_area(tree))
+        ws_hierachies = {
+                'area': hg.watershed_hierarchy_by_area,
+                'dynamics': hg.watershed_hierarchy_by_dynamics,
+                'volume': hg.watershed_hierarchy_by_volume,
+                'parents': hg.watershed_hierarchy_by_number_of_parents,
+            }
 
+        self._tree, alt = ws_hierachies[self._watershed_attribute](
+                self._graph, weight)
 
-        
         # Node represented by the average gray level inside a node
         self._alt, self._variance = hg.attribute_gaussian_region_weights_model(self._tree, self._image)

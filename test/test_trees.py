@@ -53,11 +53,25 @@ def test_AlphaTree_constructor(image):
 def test_OmegaTree_constructor(image):
     t = sap.OmegaTree(image)
 
-#@pytest.mark.parametrize('watershed_attribute', ['area', 'dynamics', 'volume', 'parents'])
-@pytest.mark.parametrize('watershed_attribute', ['area', 'dynamics', 'volume'])
-def test_WatershedTree_constructor(image, watershed_attribute):
+@pytest.mark.parametrize('watershed_attribute, markers',
+        [('area', None),
+         ('dynamics', None),
+         ('volume', None),
+         ('parents', None),
+         ('area', np.ones_like(image))
+        ])
+def test_WatershedTree_constructor(image, watershed_attribute, markers):
     markers = np.ones_like(image)
     t = sap.WatershedTree(image, markers, watershed_attribute=watershed_attribute)
+
+#def test_WatershedTree_construct(image):
+#    graph = sap.hg.get_4_adjacency_graph(image.shape)
+#
+#    get_area = lambda tree, _: sap.hg.attribute_area(tree)
+#    direct_function = sap.hg.watershed_hierarchy_by_area(graph, weight) 
+#    lambda_function = sap.hg.watershed_hierarchy_by_attribute(graph, weight, get_area)
+#
+#    assert direct_function == lambda_function
 
 def test_AlphaTree_exception(image):
     with pytest.raises(AttributeError):

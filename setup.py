@@ -11,14 +11,13 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='sap',
-    #version='0.2.5',
-    version='0.0.99',
+    version='0.2.6',
     author='Florent Guiotte',
-    author_email='florent.guiotte@irisa.fr',
+    author_email='florent@guiotte.fr',
     description='Simple Attribute Profiles',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://gitlab.inria.fr/fguiotte/sap',
+    url='https://github.com/fguiotte/sap',
     packages=setuptools.find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
@@ -31,6 +30,5 @@ setuptools.setup(
         'higra',
         'tqdm',
         'matplotlib',
-        'pathlib'
     ],
 )

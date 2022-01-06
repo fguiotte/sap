@@ -170,7 +170,7 @@ class Tree:
 
     Notes
     -----
-    You should not instantiate class `Tree` directly, use `MaxTree` or
+    You should not instantiate class :class:`Tree` directly, use `MaxTree` or
     `MinTree` instead.
 
     """
@@ -257,8 +257,8 @@ class Tree:
 
         return attribute_func
 
-    def _set_params_on_higra_attribute_func(self, attribute_func):
-        kwargs = {}
+    def _set_params_on_higra_attribute_func(self, attribute_func, **kwargs):
+        kwargs = {} if kwargs is None else kwargs
 
         if 'altitudes' in inspect.signature(attribute_func).parameters:
             kwargs['altitudes'] = kwargs.get('altitudes', self._alt)
@@ -267,9 +267,9 @@ class Tree:
             kwargs['vertex_weights'] = kwargs.get('vertex_weights', self._image)
         return functools.partial(attribute_func, **kwargs)
 
-    def _get_higra_attribute_func_with_default(self, attribute_name):
+    def _get_higra_attribute_func_with_default(self, attribute_name, **kwargs):
         attribute_func = self._get_higra_attribute_func(attribute_name)
-        attribute_func = self._set_params_on_higra_attribute_func(attribute_func)
+        attribute_func = self._set_params_on_higra_attribute_func(attribute_func, **kwargs)
 
         return attribute_func
 
@@ -312,9 +312,9 @@ class Tree:
         array([   1.,    1.,    1., ...,  998.,  999., 1000.])
 
         """
-        compute = self._get_higra_attribute_func_with_default(attribute_name)
+        compute = self._get_higra_attribute_func_with_default(attribute_name, **kwargs)
 
-        return compute(self._tree, **kwargs)
+        return compute(self._tree)
 
     def reconstruct(self, deleted_nodes=None, feature='altitude',
                     filtering='direct'):
@@ -464,7 +464,7 @@ class MinTree(Tree):
 
     Notes
     -----
-    Inherits all methods of `Tree` class.
+    Inherits all methods of :class:`Tree` class.
 
     """
     def __init__(self, image, adjacency=4, image_name=None):
@@ -492,7 +492,7 @@ class TosTree(Tree):
 
     Notes
     -----
-    Inherits all the methods of `Tree` class.
+    Inherits all the methods of :class:`Tree` class.
 
     Todo
     ----
@@ -526,6 +526,10 @@ class AlphaTree(Tree):
         Can be 'L0', 'L1', 'L2', 'L2_squared', 'L_infinity', 'max',
         'min', 'mean' or a `higra.WeightFunction`. The default is
         'L1'.
+
+    Notes
+    -----
+    Inherits all the methods of :class:`Tree` class.
 
     """
     def __init__(self, image, adjacency=4, image_name=None, weight_function='L1'):
@@ -565,6 +569,10 @@ class OmegaTree(Tree):
     image_name : str, optional
         The name of the image Useful to track filtering process and
         display.
+
+    Notes
+    -----
+    Inherits all the methods of :class:`Tree` class.
 
     """
     def __init__(self, image, adjacency=4, image_name=None):
@@ -614,6 +622,8 @@ class WatershedTree(Tree):
 
     Notes
     -----
+    Inherits all the methods of :class:`Tree` class.
+
     The :attr:`markers` parameter is prior-knowledge to be combined to
     the image gradient before the construction of the hierarchical
     watershed. The method is described in :

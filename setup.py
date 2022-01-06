@@ -11,7 +11,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='sap',
-    version='0.2.6',
+    version='0.2.7',
     author='Florent Guiotte',
     author_email='florent@guiotte.fr',
     description='Simple Attribute Profiles',

@@ -21,8 +21,8 @@ Simple Attribute Profiles's documentation
 .. toctree::
     :caption: Links
 
-    Source code <https://gitlab.inria.fr/fguiotte/sap>
-    Issue tracker <https://gitlab.inria.fr/fguiotte/sap/issues>
+    Source code <https://github.com/fguiotte/sap>
+    Issue tracker <https://github.com/fguiotte/sap/issues>
     Pypi package <https://pypi.org/project/sap/>
 
 

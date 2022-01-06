@@ -53,8 +53,14 @@ def test_AlphaTree_constructor(image):
 def test_OmegaTree_constructor(image):
     t = sap.OmegaTree(image)
 
-@pytest.mark.parametrize('watershed_attribute', ['area', 'dynamics', 'volume', 'parents'])
-def test_WatershedTree_constructor(image, watershed_attribute):
+@pytest.mark.parametrize('watershed_attribute, markers',
+        [('area', None),
+         ('dynamics', None),
+         ('volume', None),
+         ('parents', None),
+         ('area', np.ones_like(image))
+        ])
+def test_WatershedTree_constructor(image, watershed_attribute, markers):
     markers = np.ones_like(image)
     t = sap.WatershedTree(image, markers, watershed_attribute=watershed_attribute)
 

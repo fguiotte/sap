@@ -140,6 +140,14 @@ def test_alpha_profiles(image):
 
     assert len(ap.data) == 3
 
+def test_watershed_profiles(image):
+    ap = sap.watershed_profiles(image, {'area': [10, 100]})
+
+    assert len(ap) == 1
+
+    assert len(ap.data) == 3
+
+
 def test_attribute_profiles_assert(image):
     with pytest.raises(AttributeError) as e:
         sap.Profiles([image], [{}, {}, {}])
@@ -266,4 +274,3 @@ def test_profiles_strip_copy(profiles):
         assert not 'copy' in [x['operation'] for x in
             p.description['profiles']], 'There is a original image in\
             filtered profiles'
-

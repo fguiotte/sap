@@ -606,7 +606,7 @@ class WatershedTree(Tree):
 
     We expect the markers to be a gray-scale image in which dark and
     homogeneous regions have the highest probability of belonging to the
-    same catchment basins.  If :attr:'markers' is ``None``, it is
+    same catchment basins.  If :attr:`markers` is ``None``, it is
     replaced by an ndarray of ones, the result will be equivalent of not
     using markers at all.
 

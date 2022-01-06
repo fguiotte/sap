@@ -654,9 +654,9 @@ def watershed_profiles(image, attribute, markers=None, adjacency=4, image_name=N
         (as values, number).
     markers : 2D ndarray of same dimension as 'image'  
         Prior-knowledge to be combined to the image gradient before the
-        construction of the hierarchical watershed.  If :attr:'markers'
-        is ``None``, an ndarray of ones is used, the result will be
-        equivalent of not using markers at all.
+        construction of the hierarchical watershed.  If ``None``, an
+        ndarray of ones is used, the result will be equivalent of not
+        using markers at all.
     adjacency : int
         Adjacency used for the tree construction. Default is 4.
     image_name : str

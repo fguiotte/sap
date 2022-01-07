@@ -482,10 +482,8 @@ class TosTree(Tree):
     image : ndarray
         The image to be represented by the tree structure.
     adjacency : int
-        The pixel connectivity to use during the tree creation. It
-        determines the number of pixels to be taken into account in the
-        neighborhood of each pixel. The allowed adjacency are 4 or 8.
-        Default is 4.
+        **Not implemented yet**, this parameter is set for compatibility
+        with other tree constructors.
     image_name : str, optional
         The name of the image Useful to track filtering process and
         display.

@@ -19,7 +19,7 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'Simple Attribute Profiles'
-copyright = '2019, Florent Guiotte'
+copyright = '2019-2022, Florent Guiotte'
 author = 'Florent Guiotte'
 
 # The full version, including alpha/beta/rc tags
@@ -70,3 +70,5 @@ html_theme = 'sphinx_rtd_theme'
 #html_static_path = ['_static']
 
 todo_include_todos = True
+
+autodoc_member_order = 'bysource'

@@ -7,16 +7,16 @@ Simple Attribute Profiles's documentation
 =========================================
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Informations
+    :maxdepth: 1
+    :caption: Setup
 
-    info/start
+    Getting Started <info/start>
 
 .. toctree::
     :maxdepth: 3
-    :caption: API
+    :caption: Usage
 
-    SAP <source/sap>
+    Python API <source/sap>
 
 .. toctree::
     :caption: Links

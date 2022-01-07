@@ -11,6 +11,7 @@ This package provides:
 
 1. Easy to use tree structures.
 2. Straight forward attribute profiles computation.
+3. Simple pattern spectra computation and display.
 
 This package heavily relies on the outstanding library `higra
 <https://higra.readthedocs.io>`_ which provide efficient tree structure
@@ -34,7 +35,7 @@ directly the docstrings.
 Submodules access
 -----------------
 
-For simplicity the submodules classes and function are directly
+For simplicity, the submodules classes and functions are directly
 available at the root of the module. In doing so:
 
 >>> from sap import trees
@@ -44,6 +45,18 @@ Is equivalent to:
 
 >>> import sap
 >>> sap.MaxTree
+
+Organisation of the submodules
+------------------------------
+
+- :mod:`sap.trees`: Submodule to build trees of images. This submodule
+  also include functions and methods to easily process attribute filters
+  on the trees.
+- :mod:`sap.profiles`: Submodule to compute Attribute Profiles (and
+  other profiles) of images, to concatenate them and to display them.
+- :mod:`sap.spectra`: Submodule to compute Pattern Spectra of trees and
+  to display them. Pattern Spectra can be useful to set thresholds of
+  attribute filters and Attribute Profiles.
 
 """
 

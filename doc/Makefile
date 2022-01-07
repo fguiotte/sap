@@ -19,7 +19,7 @@ clean:
 	rm -rf source _build
 
 autogen:
-	sphinx-apidoc ../sap -o source -EeMT
+	sphinx-apidoc ../sap -o source -EeMTa
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

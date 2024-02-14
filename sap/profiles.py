@@ -997,13 +997,26 @@ def concatenate(sequence):
     profiles : Profiles
         The concatenated profiles.
 
+    Notes
+    -----
+    This function can be replaced by operator ``+``.
+
+
     Examples
     --------
+
+    Create two APs:
 
     >>> aps_a = sap.attribute_profiles(image, {'area': [10, 100]})
     >>> aps_b = sap.attribute_profiles(image, {'compactness': [.1, .5]})
 
+    And concatenate:
+
     >>> aps = sap.concatenate((aps_a, aps_b))
+
+    That is equivalent to:
+
+    >>> aps = aps_a + aps_b
 
     >>> len(aps) == len(aps_a) + len(aps_b)
     True

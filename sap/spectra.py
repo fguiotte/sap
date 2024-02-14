@@ -106,7 +106,8 @@ def _get_space_geo(vmin, vmax, thresholds):
     return np.geomspace(vmin, vmax, thresholds)
 
 def spectrum2d(tree, x_attribute, y_attribute, x_count=100, y_count=100, 
-               x_log=False, y_log=False, weighted=True, normalized=True):
+               x_log=False, y_log=False, weighted=True, normalized=True,
+               node_mask=None):
     """
     Compute 2D pattern spectrum.
 
@@ -138,6 +139,8 @@ def spectrum2d(tree, x_attribute, y_attribute, x_count=100, y_count=100,
         If ``True``, the weights of the spectrum are normalized with the
         size of the image. If ``False`` or ``weighted`` is ``False``,
         the spectrum is not normalized. Default is ``True``.
+    node_mask : ndarray, optional
+        Boolean mask array of the node to be considered in the spectrum.
 
     Returns
     -------
@@ -169,7 +172,11 @@ def spectrum2d(tree, x_attribute, y_attribute, x_count=100, y_count=100,
     #weights = weights / weights.max() if normalized and weighted else weights
     #weights = weights / weights.sum() if normalized and weighted else weights
 
-    s, xedges, yedges = np.histogram2d(x, y, bins=bins, density=None, weights=weights)
+    node_mask = np.ones_like(x, dtype=bool) if node_mask is None else node_mask
+
+    s, xedges, yedges = np.histogram2d(x[node_mask], y[node_mask], 
+                                       bins=bins, density=None, 
+                                       weights=weights[node_mask])
 
     return s, xedges, yedges, x_log, y_log
 
@@ -256,7 +263,10 @@ def show_spectrum(s, xedges, yedges, x_log, y_log, log_scale=True):
     .. image:: ../../img/ps_log.png
 
     """
-    pc = plt.pcolormesh(xedges, yedges, s.T, norm=mpl.colors.LogNorm() if log_scale else None)
+    # XXX: pcolormesh is borked in matplotlib 3.5
+    # https://github.com/matplotlib/matplotlib/issues/21917
+    #pc = plt.pcolormesh(xedges, yedges, s.T, norm=mpl.colors.LogNorm() if log_scale else None)
+    pc = plt.pcolor(xedges, yedges, s.T, norm=mpl.colors.LogNorm() if log_scale else None)
 
     plt.gca().set_xlim(xedges[0], xedges[-1])
     plt.gca().set_ylim(yedges[0], yedges[-1])

@@ -2,7 +2,7 @@
 
 
 [![build status](https://github.com/fguiotte/sap/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/fguiotte/sap/actions/workflows/main.yml)
-[![codecov](https://codecov.io/gh/fguiotte/sap/branch/master/graph/badge.svg?token=D8VCLKNAYW)](https://codecov.io/gh/fguiotte/sap)
+[![codecov](https://img.shields.io/codecov/c/github/fguiotte/sap?logo=codecov&token=D8VCLKNAYW)](https://codecov.io/gh/fguiotte/sap)
 [![Documentation Status](https://img.shields.io/readthedocs/python-sap/master)](https://python-sap.readthedocs.io/en/master)
 [![Pypi version](https://img.shields.io/pypi/v/sap.svg)](https://pypi.org/project/sap/)
 [![Pypi python](https://img.shields.io/pypi/pyversions/sap)](https://pypi.org/project/sap/)
@@ -45,5 +45,5 @@ plt.show()
 ## Develop status
 
 [![build status](https://github.com/fguiotte/sap/actions/workflows/main.yml/badge.svg?branch=develop)](https://github.com/fguiotte/sap/actions/workflows/main.yml)
-[![codecov](https://codecov.io/gh/fguiotte/sap/branch/develop/graph/badge.svg?token=D8VCLKNAYW)](https://codecov.io/gh/fguiotte/sap)
+[![codecov](https://img.shields.io/codecov/c/github/fguiotte/sap/develop?logo=codecov&token=D8VCLKNAYW)](https://codecov.io/gh/fguiotte/sap)
 [![Documentation Status](https://img.shields.io/readthedocs/python-sap/develop)](https://python-sap.readthedocs.io/en/develop)

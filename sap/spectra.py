@@ -173,10 +173,11 @@ def spectrum2d(tree, x_attribute, y_attribute, x_count=100, y_count=100,
     #weights = weights / weights.sum() if normalized and weighted else weights
 
     node_mask = np.ones_like(x, dtype=bool) if node_mask is None else node_mask
+    weights = weights[node_mask] if weighted else None
 
     s, xedges, yedges = np.histogram2d(x[node_mask], y[node_mask], 
                                        bins=bins, density=None, 
-                                       weights=weights[node_mask])
+                                       weights=weights)
 
     return s, xedges, yedges, x_log, y_log
 
